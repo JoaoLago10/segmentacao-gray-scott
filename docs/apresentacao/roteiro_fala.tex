@@ -1,0 +1,78 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{parskip}
+
+\newcommand{\slide}[2]{\subsection*{Slide #1 --- #2}}
+
+\title{Roteiro de fala --- Segmentação 2D no Gray-Scott}
+\author{Equipe Gray-Scott}
+\date{Novembro de 2026}
+
+\begin{document}
+\maketitle
+
+\noindent Tempo estimado: 6 a 8 minutos (cerca de 45 segundos por slide).
+
+\slide{1}{Título}
+Boa tarde. Vamos apresentar o andamento do nosso trabalho de PDI: a segmentação de padrões
+no dataset Gray-Scott, do The Well.
+
+\slide{2}{Objetivo e dataset}
+A pergunta que guia o trabalho é: onde estão as estruturas e como elas evoluem no tempo?
+Para responder, vamos segmentar os padrões de Turing do Gray-Scott, um sistema de
+reação-difusão com duas concentrações químicas, $A$ e $B$. O experimento cruza dez
+pré-processamentos, três redes (U-Net, SegFormer e Mask2Former) e dez pós-processamentos,
+o que dá trezentas combinações. O dataset tem seis regimes, definidos pelos parâmetros $f$ e $k$,
+e cada regime gera um padrão diferente: pontos, labirintos, espirais, entre outros.
+
+\slide{3}{Situação do projeto}
+Dividimos o trabalho em sete etapas. A auditoria do dataset está concluída. A definição do
+ground truth está pronta para decisão, mas depende de uma resposta do professor. As etapas
+de código, piloto e experimentos vêm na sequência. Como nossa máquina não tem GPU, os
+treinos serão feitos no Colab ou no Kaggle.
+
+\slide{4}{Auditoria: principais achados}
+Antes de treinar, verificamos os dados. A divisão oficial tem 160 trajetórias de treino,
+20 de validação e 20 de teste por regime. Lemos só as partes necessárias dos arquivos:
+2,5 GB em vez de 154. Confirmamos as trajetórias estacionárias de Gliders e Spirals e
+descobrimos que nelas o padrão desaparece por volta de 500 segundos, o que geraria máscaras
+vazias. Também vimos que o instante inicial tem valores atípicos e que a documentação tem
+um erro de sinal na equação de $B$.
+
+\slide{5}{Tabela visual por instante}
+Esta é a tabela visual pedida pelo professor: uma simulação de cada regime em seis instantes.
+Ela mostra a evolução de cada padrão. Maze e Spots estabilizam cedo, enquanto Spirals e
+Gliders continuam se movendo até o final. Essa diferença vai ser importante na definição do
+ground truth.
+
+\slide{6}{Ground truth: alternativas}
+O ground truth é o gabarito: uma máscara que diz, pixel a pixel, onde há padrão. Como o
+dataset não traz máscaras, nós as definimos a partir de $B$. Avaliamos três alternativas:
+uma máscara binária por limiar, uma versão com três classes, que inclui a interface, e a
+separação em componentes conexos. O limiar de 0,151 foi calculado pelo método de Otsu,
+usando apenas os dados de treino.
+
+\slide{7}{O ``frame médio'' representa o fluido?}
+O professor sugeriu um ground truth baseado em um frame médio. Testamos isso medindo o
+quanto uma máscara fixa coincide com os outros instantes. Nos regimes estáveis, como Maze
+e Spots, funciona razoavelmente. Já em Gliders e Spirals o padrão se move e a coincidência
+cai para menos de 20\%. Por isso, propomos que o frame médio defina o critério e que a
+máscara seja gerada em cada instante.
+
+\slide{8}{Decisões tomadas}
+Já tomamos algumas decisões. A rede vai receber só $A$, porque a máscara vem de $B$: se a
+rede visse $B$, ela apenas reaprenderia o limiar. Vamos excluir os frames sem padrão e o
+instante inicial. Na condição ``sem pré'' usamos os dados brutos, e na ``sem pós'',
+binarização com limiar fixo de 0,5.
+
+\slide{9}{Perguntas e próximos passos}
+Para seguir, precisamos de algumas respostas do professor, principalmente sobre o que é o
+frame médio e se o ground truth deve ser um por regime. Com isso definido, implementamos o
+código, rodamos um piloto, depois os 33 treinamentos, e por fim as tabelas e o artigo.
+Obrigado.
+
+\end{document}

@@ -1,0 +1,202 @@
+{
+ "limiares": {
+  "otsu_B_global": 0.15074408054351807,
+  "otsu_B_global_sem_frames_mortos": 0.15386232733726501,
+  "otsu_B_por_regime": {
+   "gliders": 0.10470292717218399,
+   "bubbles": 0.199709951877594,
+   "maze": 0.16120612621307373,
+   "worms": 0.17487385869026184,
+   "spirals": 0.12636862695217133,
+   "spots": 0.1544349193572998
+  },
+  "otsu_distancia_estado_trivial": 0.3593950867652893,
+  "otsu_A_global": 0.678749144077301
+ },
+ "mascaras_validacao": {
+  "gliders": {
+   "frac_padrao_tau_global": 0.05077191162109375,
+   "frac_padrao_tau_regime": 0.0681939697265625,
+   "frac_padrao_distancia_trivial": 0.08735382080078125,
+   "frac_mascaras_vazias_tau_global": 0.547,
+   "frac_classes_3c": [
+    0.9002147216796875,
+    0.01576416015625,
+    0.0840211181640625
+   ],
+   "iou_tau_global_vs_tau_regime": 0.744522013085233,
+   "iou_tau_global_vs_distancia_trivial": 0.5812214183153357,
+   "componentes_t5000_media": 31.1,
+   "componentes_t5000_min_max": [
+    0,
+    75
+   ]
+  },
+  "bubbles": {
+   "frac_padrao_tau_global": 0.28256365966796876,
+   "frac_padrao_tau_regime": 0.2516485595703125,
+   "frac_padrao_distancia_trivial": 0.2634423217773437,
+   "frac_mascaras_vazias_tau_global": 0.0,
+   "frac_classes_3c": [
+    0.5893291015625,
+    0.1439366455078125,
+    0.2667342529296875
+   ],
+   "iou_tau_global_vs_tau_regime": 0.8905906720843595,
+   "iou_tau_global_vs_distancia_trivial": 0.9323165757039611,
+   "componentes_t5000_media": 10.5,
+   "componentes_t5000_min_max": [
+    1,
+    28
+   ]
+  },
+  "maze": {
+   "frac_padrao_tau_global": 0.51532373046875,
+   "frac_padrao_tau_regime": 0.49351702880859377,
+   "frac_padrao_distancia_trivial": 0.71323486328125,
+   "frac_mascaras_vazias_tau_global": 0.0,
+   "frac_classes_3c": [
+    0.19508807373046874,
+    0.22273126220703124,
+    0.5821806640625
+   ],
+   "iou_tau_global_vs_tau_regime": 0.9576834902589866,
+   "iou_tau_global_vs_distancia_trivial": 0.7225160348499496,
+   "componentes_t5000_media": 3.35,
+   "componentes_t5000_min_max": [
+    1,
+    7
+   ]
+  },
+  "worms": {
+   "frac_padrao_tau_global": 0.250744384765625,
+   "frac_padrao_tau_regime": 0.22710693359375,
+   "frac_padrao_distancia_trivial": 0.2517313232421875,
+   "frac_mascaras_vazias_tau_global": 0.0,
+   "frac_classes_3c": [
+    0.5402714233398438,
+    0.07875872802734375,
+    0.3809698486328125
+   ],
+   "iou_tau_global_vs_tau_regime": 0.9057308852839543,
+   "iou_tau_global_vs_distancia_trivial": 0.9618593114992091,
+   "componentes_t5000_media": 70.65,
+   "componentes_t5000_min_max": [
+    13,
+    125
+   ]
+  },
+  "spirals": {
+   "frac_padrao_tau_global": 0.26896258544921875,
+   "frac_padrao_tau_regime": 0.3137425537109375,
+   "frac_padrao_distancia_trivial": 0.459507080078125,
+   "frac_mascaras_vazias_tau_global": 0.049,
+   "frac_classes_3c": [
+    0.5670704956054687,
+    0.11987579345703125,
+    0.3130537109375
+   ],
+   "iou_tau_global_vs_tau_regime": 0.8572716141560568,
+   "iou_tau_global_vs_distancia_trivial": 0.5853280691170137,
+   "componentes_t5000_media": 39.1,
+   "componentes_t5000_min_max": [
+    0,
+    60
+   ]
+  },
+  "spots": {
+   "frac_padrao_tau_global": 0.2639678955078125,
+   "frac_padrao_tau_regime": 0.2588682861328125,
+   "frac_padrao_distancia_trivial": 0.33514862060546874,
+   "frac_mascaras_vazias_tau_global": 0.0,
+   "frac_classes_3c": [
+    0.45218597412109374,
+    0.06994482421875,
+    0.47786920166015623
+   ],
+   "iou_tau_global_vs_tau_regime": 0.9806809484722013,
+   "iou_tau_global_vs_distancia_trivial": 0.7876072850288385,
+   "componentes_t5000_media": 200.85,
+   "componentes_t5000_min_max": [
+    192,
+    207
+   ]
+  }
+ },
+ "vazamento": {
+  "gliders": {
+   "iou_A_otsu": 0.5180203995593525,
+   "iou_A_melhor_limiar": 0.8547401126202167,
+   "melhor_limiar_A": 0.51
+  },
+  "bubbles": {
+   "iou_A_otsu": 0.9187290074109914,
+   "iou_A_melhor_limiar": 0.9799477826708158,
+   "melhor_limiar_A": 0.72
+  },
+  "maze": {
+   "iou_A_otsu": 0.6555351780161089,
+   "iou_A_melhor_limiar": 0.9661350860881992,
+   "melhor_limiar_A": 0.53
+  },
+  "worms": {
+   "iou_A_otsu": 0.949613096154176,
+   "iou_A_melhor_limiar": 0.9494803684319133,
+   "melhor_limiar_A": 0.6799999999999999
+  },
+  "spirals": {
+   "iou_A_otsu": 0.5470883901599893,
+   "iou_A_melhor_limiar": 0.8099965467657898,
+   "melhor_limiar_A": 0.45
+  },
+  "spots": {
+   "iou_A_otsu": 0.7276042345756382,
+   "iou_A_melhor_limiar": 0.9715081273998634,
+   "melhor_limiar_A": 0.5900000000000001
+  }
+ },
+ "frame_medio": {
+  "gliders": {
+   "iou_mediana_vs_t5000_em_t1000": 0.04185351270553064,
+   "iou_mediana_vs_t5000_em_t10000": 0.07914572864321608,
+   "iou_mediana_vs_media_em_t5000": 0.0,
+   "iou_mediana_vs_media_em_t10000": 0.0,
+   "frac_pixels_mascara_media": 0.0
+  },
+  "bubbles": {
+   "iou_mediana_vs_t5000_em_t1000": 0.6157595307778922,
+   "iou_mediana_vs_t5000_em_t10000": 0.6988270978908204,
+   "iou_mediana_vs_media_em_t5000": 0.9039599496956607,
+   "iou_mediana_vs_media_em_t10000": 0.729557284776875,
+   "frac_pixels_mascara_media": 0.2927825927734375
+  },
+  "maze": {
+   "iou_mediana_vs_t5000_em_t1000": 0.572887296134226,
+   "iou_mediana_vs_t5000_em_t10000": 0.738591883773343,
+   "iou_mediana_vs_media_em_t5000": 0.919622038236755,
+   "iou_mediana_vs_media_em_t10000": 0.7724031017274855,
+   "frac_pixels_mascara_media": 0.5345062255859375
+  },
+  "worms": {
+   "iou_mediana_vs_t5000_em_t1000": 0.35060490987208043,
+   "iou_mediana_vs_t5000_em_t10000": 0.5121342334303116,
+   "iou_mediana_vs_media_em_t5000": 0.7960930217552099,
+   "iou_mediana_vs_media_em_t10000": 0.5993445374769921,
+   "frac_pixels_mascara_media": 0.2653656005859375
+  },
+  "spirals": {
+   "iou_mediana_vs_t5000_em_t1000": 0.1524317121918721,
+   "iou_mediana_vs_t5000_em_t10000": 0.1735687394521615,
+   "iou_mediana_vs_media_em_t5000": 0.0,
+   "iou_mediana_vs_media_em_t10000": 0.0,
+   "frac_pixels_mascara_media": 0.00026020250822368423
+  },
+  "spots": {
+   "iou_mediana_vs_t5000_em_t1000": 0.15569334402278376,
+   "iou_mediana_vs_t5000_em_t10000": 0.628654690960906,
+   "iou_mediana_vs_media_em_t5000": 0.8332284145846967,
+   "iou_mediana_vs_media_em_t10000": 0.6859745309750053,
+   "frac_pixels_mascara_media": 0.2727691650390625
+  }
+ }
+}
