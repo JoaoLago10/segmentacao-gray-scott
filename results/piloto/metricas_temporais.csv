@@ -1,0 +1,133 @@
+Condicao,Pre,Arquitetura,Pos,ErroArea,ErroCentroide,ErroConsist
+Sem pré e sem pós,nenhum,PointNet,nenhum,0.0101,21.3263,0.0203
+Sem pré e sem pós,nenhum,PointNet++,nenhum,0.0050,18.1541,0.0164
+Sem pré e sem pós,nenhum,DGCNN,nenhum,0.0057,14.3357,0.0081
+Somente pré,P1,PointNet,nenhum,0.0085,18.9386,0.0164
+Somente pré,P6,PointNet,nenhum,0.0141,23.9204,0.0284
+Somente pré,P9,PointNet,nenhum,0.0129,23.6023,0.0205
+Somente pré,P1,PointNet++,nenhum,0.0045,17.6880,0.0135
+Somente pré,P6,PointNet++,nenhum,0.0054,20.1306,0.0181
+Somente pré,P9,PointNet++,nenhum,0.0051,18.3454,0.0184
+Somente pré,P1,DGCNN,nenhum,0.0063,13.4577,0.0069
+Somente pré,P6,DGCNN,nenhum,0.0056,14.0735,0.0110
+Somente pré,P9,DGCNN,nenhum,0.0051,14.7712,0.0103
+Somente pós,nenhum,PointNet,Q1,0.0108,20.9831,0.0144
+Somente pós,nenhum,PointNet,Q2,0.0106,22.5241,0.0211
+Somente pós,nenhum,PointNet,Q3,0.0102,21.1745,0.0209
+Somente pós,nenhum,PointNet,Q4,0.0106,22.4249,0.0216
+Somente pós,nenhum,PointNet,Q5,0.0101,21.3267,0.0203
+Somente pós,nenhum,PointNet,Q6,0.0101,21.3310,0.0203
+Somente pós,nenhum,PointNet,Q7,0.0101,21.3091,0.0202
+Somente pós,nenhum,PointNet,Q8,0.0110,21.1221,0.0163
+Somente pós,nenhum,PointNet,Q9,0.0106,21.4417,0.0224
+Somente pós,nenhum,PointNet,Q10,0.0152,26.4234,0.1249
+Somente pós,nenhum,PointNet++,Q1,0.0045,18.1538,0.0128
+Somente pós,nenhum,PointNet++,Q2,0.0053,18.2383,0.0156
+Somente pós,nenhum,PointNet++,Q3,0.0053,17.8796,0.0176
+Somente pós,nenhum,PointNet++,Q4,0.0055,18.1039,0.0161
+Somente pós,nenhum,PointNet++,Q5,0.0050,18.1250,0.0163
+Somente pós,nenhum,PointNet++,Q6,0.0050,18.1574,0.0164
+Somente pós,nenhum,PointNet++,Q7,0.0050,18.1231,0.0163
+Somente pós,nenhum,PointNet++,Q8,0.0053,18.4389,0.0147
+Somente pós,nenhum,PointNet++,Q9,0.0052,17.8216,0.0158
+Somente pós,nenhum,PointNet++,Q10,0.0161,26.0278,0.1100
+Somente pós,nenhum,DGCNN,Q1,0.0054,14.0476,0.0070
+Somente pós,nenhum,DGCNN,Q2,0.0059,14.6017,0.0084
+Somente pós,nenhum,DGCNN,Q3,0.0058,14.2685,0.0087
+Somente pós,nenhum,DGCNN,Q4,0.0060,14.6741,0.0088
+Somente pós,nenhum,DGCNN,Q5,0.0057,14.3357,0.0081
+Somente pós,nenhum,DGCNN,Q6,0.0057,14.3330,0.0081
+Somente pós,nenhum,DGCNN,Q7,0.0057,14.3399,0.0080
+Somente pós,nenhum,DGCNN,Q8,0.0057,13.5878,0.0078
+Somente pós,nenhum,DGCNN,Q9,0.0061,14.2687,0.0086
+Somente pós,nenhum,DGCNN,Q10,0.0164,21.3226,0.1000
+Pré e pós,P1,PointNet,Q1,0.0083,18.3087,0.0181
+Pré e pós,P1,PointNet,Q2,0.0091,20.0394,0.0184
+Pré e pós,P1,PointNet,Q3,0.0086,18.9015,0.0170
+Pré e pós,P1,PointNet,Q4,0.0092,19.9637,0.0189
+Pré e pós,P1,PointNet,Q5,0.0085,18.9369,0.0164
+Pré e pós,P1,PointNet,Q6,0.0085,18.9401,0.0164
+Pré e pós,P1,PointNet,Q7,0.0086,18.9064,0.0163
+Pré e pós,P1,PointNet,Q8,0.0098,18.3914,0.0159
+Pré e pós,P1,PointNet,Q9,0.0089,18.9464,0.0199
+Pré e pós,P1,PointNet,Q10,0.0161,24.3219,0.1130
+Pré e pós,P6,PointNet,Q1,0.0151,23.5652,0.0175
+Pré e pós,P6,PointNet,Q2,0.0147,24.3309,0.0299
+Pré e pós,P6,PointNet,Q3,0.0145,24.1630,0.0282
+Pré e pós,P6,PointNet,Q4,0.0151,24.5504,0.0296
+Pré e pós,P6,PointNet,Q5,0.0141,23.9192,0.0284
+Pré e pós,P6,PointNet,Q6,0.0141,23.9304,0.0284
+Pré e pós,P6,PointNet,Q7,0.0142,23.9570,0.0283
+Pré e pós,P6,PointNet,Q8,0.0144,23.2971,0.0230
+Pré e pós,P6,PointNet,Q9,0.0124,22.5520,0.0249
+Pré e pós,P6,PointNet,Q10,0.0167,29.0958,0.1292
+Pré e pós,P9,PointNet,Q1,0.0137,24.0880,0.0161
+Pré e pós,P9,PointNet,Q2,0.0134,23.2591,0.0218
+Pré e pós,P9,PointNet,Q3,0.0129,23.3061,0.0211
+Pré e pós,P9,PointNet,Q4,0.0135,23.4326,0.0221
+Pré e pós,P9,PointNet,Q5,0.0129,23.6051,0.0205
+Pré e pós,P9,PointNet,Q6,0.0129,23.6035,0.0205
+Pré e pós,P9,PointNet,Q7,0.0130,23.6191,0.0203
+Pré e pós,P9,PointNet,Q8,0.0131,22.8960,0.0180
+Pré e pós,P9,PointNet,Q9,0.0110,19.5151,0.0205
+Pré e pós,P9,PointNet,Q10,0.0159,28.0410,0.1195
+Pré e pós,P1,PointNet++,Q1,0.0040,17.4872,0.0082
+Pré e pós,P1,PointNet++,Q2,0.0045,17.7320,0.0123
+Pré e pós,P1,PointNet++,Q3,0.0048,17.7752,0.0144
+Pré e pós,P1,PointNet++,Q4,0.0047,17.7242,0.0127
+Pré e pós,P1,PointNet++,Q5,0.0045,17.6555,0.0135
+Pré e pós,P1,PointNet++,Q6,0.0045,17.7310,0.0135
+Pré e pós,P1,PointNet++,Q7,0.0045,17.6471,0.0134
+Pré e pós,P1,PointNet++,Q8,0.0046,17.2515,0.0117
+Pré e pós,P1,PointNet++,Q9,0.0047,16.3466,0.0131
+Pré e pós,P1,PointNet++,Q10,0.0159,25.5321,0.1085
+Pré e pós,P6,PointNet++,Q1,0.0052,20.7583,0.0147
+Pré e pós,P6,PointNet++,Q2,0.0055,20.6363,0.0171
+Pré e pós,P6,PointNet++,Q3,0.0058,19.9754,0.0191
+Pré e pós,P6,PointNet++,Q4,0.0058,20.5939,0.0174
+Pré e pós,P6,PointNet++,Q5,0.0054,20.1298,0.0181
+Pré e pós,P6,PointNet++,Q6,0.0054,20.1573,0.0182
+Pré e pós,P6,PointNet++,Q7,0.0055,20.1367,0.0181
+Pré e pós,P6,PointNet++,Q8,0.0054,20.3991,0.0168
+Pré e pós,P6,PointNet++,Q9,0.0062,19.5823,0.0163
+Pré e pós,P6,PointNet++,Q10,0.0162,27.6829,0.1108
+Pré e pós,P9,PointNet++,Q1,0.0048,18.7325,0.0121
+Pré e pós,P9,PointNet++,Q2,0.0053,18.9879,0.0178
+Pré e pós,P9,PointNet++,Q3,0.0054,18.3940,0.0198
+Pré e pós,P9,PointNet++,Q4,0.0056,19.0277,0.0186
+Pré e pós,P9,PointNet++,Q5,0.0051,18.3494,0.0184
+Pré e pós,P9,PointNet++,Q6,0.0051,18.3728,0.0185
+Pré e pós,P9,PointNet++,Q7,0.0051,18.1965,0.0184
+Pré e pós,P9,PointNet++,Q8,0.0054,18.8207,0.0169
+Pré e pós,P9,PointNet++,Q9,0.0064,17.7426,0.0179
+Pré e pós,P9,PointNet++,Q10,0.0158,25.8906,0.1115
+Pré e pós,P1,DGCNN,Q1,0.0063,13.2476,0.0060
+Pré e pós,P1,DGCNN,Q2,0.0067,14.2727,0.0071
+Pré e pós,P1,DGCNN,Q3,0.0064,13.4698,0.0074
+Pré e pós,P1,DGCNN,Q4,0.0068,14.3480,0.0073
+Pré e pós,P1,DGCNN,Q5,0.0063,13.4602,0.0069
+Pré e pós,P1,DGCNN,Q6,0.0063,13.4694,0.0070
+Pré e pós,P1,DGCNN,Q7,0.0063,13.4572,0.0069
+Pré e pós,P1,DGCNN,Q8,0.0062,13.3507,0.0065
+Pré e pós,P1,DGCNN,Q9,0.0069,14.1283,0.0076
+Pré e pós,P1,DGCNN,Q10,0.0166,20.4874,0.0988
+Pré e pós,P6,DGCNN,Q1,0.0056,14.1423,0.0091
+Pré e pós,P6,DGCNN,Q2,0.0057,14.7272,0.0111
+Pré e pós,P6,DGCNN,Q3,0.0057,13.7501,0.0118
+Pré e pós,P6,DGCNN,Q4,0.0058,14.5373,0.0116
+Pré e pós,P6,DGCNN,Q5,0.0056,14.0829,0.0110
+Pré e pós,P6,DGCNN,Q6,0.0056,14.0865,0.0111
+Pré e pós,P6,DGCNN,Q7,0.0056,14.1301,0.0110
+Pré e pós,P6,DGCNN,Q8,0.0057,14.6694,0.0108
+Pré e pós,P6,DGCNN,Q9,0.0062,14.7137,0.0113
+Pré e pós,P6,DGCNN,Q10,0.0169,20.6478,0.1028
+Pré e pós,P9,DGCNN,Q1,0.0051,15.0069,0.0094
+Pré e pós,P9,DGCNN,Q2,0.0053,15.5559,0.0088
+Pré e pós,P9,DGCNN,Q3,0.0052,14.7790,0.0112
+Pré e pós,P9,DGCNN,Q4,0.0053,15.8833,0.0094
+Pré e pós,P9,DGCNN,Q5,0.0051,14.7895,0.0102
+Pré e pós,P9,DGCNN,Q6,0.0051,14.7891,0.0103
+Pré e pós,P9,DGCNN,Q7,0.0051,14.8051,0.0102
+Pré e pós,P9,DGCNN,Q8,0.0050,15.1835,0.0101
+Pré e pós,P9,DGCNN,Q9,0.0058,15.2518,0.0110
+Pré e pós,P9,DGCNN,Q10,0.0163,21.7605,0.1016

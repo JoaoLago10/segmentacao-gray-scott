@@ -1,0 +1,61 @@
+{
+ "arch": "pointnet",
+ "arquitetura": "PointNet",
+ "pre": {
+  "id": "P9",
+  "nome": "Difusão anisotrópica",
+  "params": {
+   "iteracoes": 10,
+   "kappa": 0.05,
+   "gamma": 0.2,
+   "modo": "wrap"
+  }
+ },
+ "epocas": 4,
+ "batch": 32,
+ "lr": 0.001,
+ "seed": 0,
+ "tau_gt": 0.15074408054351807,
+ "bloco": 64,
+ "passo_inferencia": 64,
+ "n_parametros": 868929,
+ "n_frames_treino": 192,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 1.411463697751363,
+   "perda_valid": 1.410382350285848,
+   "tempo_s": 52.37785768508911
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 0.923909197251002,
+   "perda_valid": 1.3003794829050699,
+   "tempo_s": 104.58461856842041
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 0.6845158636569977,
+   "perda_valid": 1.425909201304118,
+   "tempo_s": 156.76964831352234
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 0.6294253766536713,
+   "perda_valid": 0.6077123324076334,
+   "tempo_s": 224.85882425308228
+  }
+ ],
+ "tempo_treino_s": 224.85889959335327,
+ "latencia_rede_ms_frame": 302.3377513636247,
+ "latencia_pre_ms_frame": 4.831566164890925,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}

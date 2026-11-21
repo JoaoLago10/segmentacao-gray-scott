@@ -1,0 +1,67 @@
+\section{Resultados}
+\label{sec:resultados}
+
+\ifthenelse{\equal{\resdir}{piloto}}{%
+\noindent\fbox{\parbox{0.97\linewidth}{\small\textbf{Atenção:} esta versão mostra o \emph{piloto} reduzido
+(CPU; 4 trajetórias de treino por regime, 4 épocas, pré P0, P1, P6 e P9, 3 trajetórias de teste por
+regime e 4 blocos por frame). Ele valida o pipeline de ponta a ponta, mas \emph{não} é o experimento
+do artigo. Os números finais vêm de \texttt{bash scripts/rodar\_tudo.sh} em GPU, com
+\texttt{\textbackslash resdir} trocado para \texttt{exp}.}}\par\medskip}{}
+
+\subsection{Tabelas visuais por instante}
+As Figuras~\ref{fig:visual_gliders}--\ref{fig:visual_spots} mostram, para uma trajetória de teste de
+cada regime, o instante inicial ($t=0$), dois instantes intermediários ($t=400$ s, na formação do
+padrão, em que a variação entre frames é máxima, e $t=5000$ s, no meio da simulação) e o instante
+final ($t=10\,000$ s). As linhas mostram o campo $A$ bruto, o campo após o pré-processamento mais
+escolhido na condição pré e pós, o GT e, para cada arquitetura, o mapa de erros nas quatro condições
+(VP em preto, FP em vermelho, FN em azul). A coluna $t=0$ é a condição inicial e fica fora da
+avaliação quantitativa.
+
+\newcommand{\visual}[2]{%
+\begin{figure}[p]\centering
+\includegraphics[height=0.92\textheight,width=\textwidth,keepaspectratio]{\figres{tabela_visual_#1}}
+\caption{Tabela visual do regime #2: entrada, pré, GT e máscaras das três arquiteturas nas quatro
+condições (pré/pós escolhidos na validação; legenda \emph{pré / pós}).}
+\label{fig:visual_#1}
+\end{figure}}
+\visual{gliders}{Gliders}
+\visual{bubbles}{Bubbles}
+\visual{maze}{Maze}
+\visual{worms}{Worms}
+\visual{spirals}{Spirals}
+\visual{spots}{Spots}
+
+\subsection{Tabela de métricas padronizada}
+A Tabela~\ref{tab:condicoes123} traz, em ordem sequencial, as condições sem pré e sem pós, somente
+pré e somente pós. A condição pré e pós completa está no Apêndice (Tabela~\ref{tab:condicao4}), e a
+Tabela~\ref{tab:resumo} resume, por arquitetura, a referência e a melhor configuração de cada
+condição. A Figura~\ref{fig:heatmap} mostra as 363 combinações de uma vez: a célula
+(nenhum, nenhum) é a referência, a linha ``nenhum'' é somente pós, a coluna ``nenhum'' é somente
+pré e o restante é pré e pós.
+
+\tabres{t_resumo}
+\tabres{t_condicoes_123}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{\figres{heatmap_dice}}
+\caption{Dice no teste para cada par (pré, pós) e arquitetura. A cor é a diferença em relação à
+referência (sem pré e sem pós, célula destacada).}
+\label{fig:heatmap}
+\end{figure}
+
+\subsection{Resultados por regime, temporais e de custo}
+\tabres{t_regimes}
+\tabres{t_temporais}
+\tabres{t_custo}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{\figres{dice_por_regime}}
+\caption{Dice no teste por regime (IC de 95\%) nas quatro condições, por arquitetura.}
+\label{fig:regimes}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\textwidth]{\figres{curvas_treino}}
+\caption{Perda de treino (contínua) e de validação (tracejada) por época, para cada pré-processamento.}
+\label{fig:curvas}
+\end{figure}

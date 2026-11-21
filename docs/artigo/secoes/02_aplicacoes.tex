@@ -1,0 +1,41 @@
+\section{Onde o fluido se aplica}
+\label{sec:aplicacoes}
+
+O Gray-Scott é um sistema de reação-difusão, não um escoamento no sentido de Navier-Stokes. Ele
+entra no conjunto de ``fluidos'' do The Well como um meio contínuo descrito por EDPs de
+transporte (difusão) acopladas a fontes não lineares (reação). As aplicações do modelo e da
+segmentação dos seus padrões são as seguintes.
+
+\paragraph{Química} O modelo descreve a autocatálise cúbica $A + 2B \to 3B$, $B \to C$ num
+reator alimentado continuamente \cite{grayscott1984}. Os padrões previstos por Pearson
+\cite{pearson1993} foram observados experimentalmente no sistema ferrocianeto-iodato-sulfito em gel
+\cite{lee1993}. Segmentar as manchas permite medir número, área, velocidade e divisão de
+estruturas, que são as grandezas comparadas entre experimento e simulação.
+
+\paragraph{Biologia e ecologia} Mecanismos de Turing explicam padrões de pigmentação (zebras,
+peixes-zebra, conchas) e o espaçamento de estruturas no desenvolvimento \cite{kondo2010,murray2003},
+assim como os padrões de vegetação em regiões semiáridas \cite{klausmeier1999}. Nesses domínios, a
+máscara segmentada é a observável primária: fração ocupada, comprimento de onda e conectividade
+dos padrões.
+
+\paragraph{Computação gráfica: o pipeline gráfico} Reação-difusão é uma técnica clássica de
+síntese procedural de texturas \cite{turk1991,witkin1991}. No pipeline gráfico, o sistema é
+integrado no espaço de textura (ou diretamente na malha \cite{turk1991}), e o campo resultante é
+mapeado em cor, rugosidade ou deslocamento na etapa de \emph{shading}. A segmentação de $B$ é o
+que transforma o campo contínuo em regiões (por exemplo, manchas de pelagem com bordas nítidas e
+máscaras de material). Ela também é usada para controlar a evolução do padrão quadro a quadro em
+animações, o que corresponde ao filtro temporal Q10. Implementações em GPU (\emph{compute} ou
+\emph{fragment shaders} com textura em \emph{ping-pong}) usam o mesmo esquema de diferenças com
+contorno periódico (\emph{wrap}) adotado aqui.
+
+\paragraph{Aprendizado de máquina científico} O The Well usa o Gray-Scott como benchmark de
+previsão de campos (modelos substitutos) \cite{ohana2024well}. Uma segmentação confiável das
+estruturas fornece métricas físicas interpretáveis para validar esses modelos, como a preservação
+do número de manchas e a coerência temporal das frentes. Essas métricas complementam erros
+pixel a pixel como o VRMSE.
+
+\paragraph{Por que nuvem de pontos} Campos de simulação vêm de malhas regulares, adaptativas ou
+não estruturadas. Representar cada amostra como um conjunto de pontos $(x,y,a)$ torna o mesmo
+modelo aplicável a qualquer discretização e a resoluções diferentes entre fluidos, sem
+reamostragem para uma grade comum. Esse é um requisito do benchmark que junta os fluidos da
+turma.

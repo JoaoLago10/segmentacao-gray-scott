@@ -1,0 +1,555 @@
+{
+ "tau": 0.15074408054351807,
+ "train": {
+  "frames": [
+   1,
+   2,
+   4,
+   6,
+   8,
+   10,
+   15,
+   20,
+   30,
+   40,
+   50,
+   60,
+   70,
+   80,
+   90,
+   100
+  ],
+  "regimes": {
+   "gliders": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 0.8255208333333334,
+    "frac_pixels_padrao": 0.18058820176951892
+   },
+   "bubbles": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.4406960805257161
+   },
+   "maze": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.4213126500447591
+   },
+   "worms": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.2023156483968099
+   },
+   "spirals": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 0.984375,
+    "frac_pixels_padrao": 0.2813517252604167
+   },
+   "spots": {
+    "trajetorias": [
+     0,
+     7,
+     14,
+     21,
+     28,
+     35,
+     41,
+     48,
+     55,
+     62,
+     69,
+     76,
+     83,
+     90,
+     97,
+     104,
+     111,
+     118,
+     124,
+     131,
+     138,
+     145,
+     152,
+     159
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.18277406692504883
+   }
+  },
+  "forma_A": [
+   144,
+   16,
+   128,
+   128
+  ]
+ },
+ "valid": {
+  "frames": [
+   20,
+   40,
+   60,
+   80,
+   100,
+   120,
+   140,
+   160,
+   180,
+   200,
+   220,
+   240,
+   260,
+   280,
+   300,
+   320,
+   340,
+   360,
+   380,
+   400,
+   420,
+   440,
+   460,
+   480,
+   500,
+   520,
+   540,
+   560,
+   580,
+   600,
+   620,
+   640,
+   660,
+   680,
+   700,
+   720,
+   740,
+   760,
+   780,
+   800,
+   820,
+   840,
+   860,
+   880,
+   900,
+   920,
+   940,
+   960,
+   980,
+   1000
+  ],
+  "regimes": {
+   "gliders": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 0.42,
+    "frac_pixels_padrao": 0.11223609561011905
+   },
+   "bubbles": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.300240966796875
+   },
+   "maze": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.513846923828125
+   },
+   "worms": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.213512451171875
+   },
+   "spirals": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 0.808,
+    "frac_pixels_padrao": 0.28765415909266706
+   },
+   "spots": {
+    "trajetorias": [
+     0,
+     5,
+     10,
+     14,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.2612978515625
+   }
+  },
+  "forma_A": [
+   30,
+   50,
+   128,
+   128
+  ]
+ },
+ "test": {
+  "frames": [
+   20,
+   40,
+   60,
+   80,
+   100,
+   120,
+   140,
+   160,
+   180,
+   200,
+   220,
+   240,
+   260,
+   280,
+   300,
+   320,
+   340,
+   360,
+   380,
+   400,
+   420,
+   440,
+   460,
+   480,
+   500,
+   520,
+   540,
+   560,
+   580,
+   600,
+   620,
+   640,
+   660,
+   680,
+   700,
+   720,
+   740,
+   760,
+   780,
+   800,
+   820,
+   840,
+   860,
+   880,
+   900,
+   920,
+   940,
+   960,
+   980,
+   1000
+  ],
+  "regimes": {
+   "gliders": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 0.608,
+    "frac_pixels_padrao": 0.11675322683233964
+   },
+   "bubbles": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.2889498291015625
+   },
+   "maze": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.5162379150390625
+   },
+   "worms": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.289268798828125
+   },
+   "spirals": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 0.904,
+    "frac_pixels_padrao": 0.2762941343594441
+   },
+   "spots": {
+    "trajetorias": [
+     0,
+     2,
+     4,
+     6,
+     8,
+     11,
+     13,
+     15,
+     17,
+     19
+    ],
+    "frac_frames_validos": 1.0,
+    "frac_pixels_padrao": 0.2652767333984375
+   }
+  },
+  "forma_A": [
+   60,
+   50,
+   128,
+   128
+  ]
+ },
+ "visual": {
+  "frames": [
+   0,
+   40,
+   500,
+   1000
+  ],
+  "regimes": {
+   "gliders": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.09149169921875
+   },
+   "bubbles": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.032002766927083336
+   },
+   "maze": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.4465128580729167
+   },
+   "worms": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.21116129557291666
+   },
+   "spirals": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.24729410807291666
+   },
+   "spots": {
+    "trajetorias": [
+     0
+    ],
+    "frac_frames_validos": 0.75,
+    "frac_pixels_padrao": 0.22896321614583334
+   }
+  },
+  "forma_A": [
+   6,
+   4,
+   128,
+   128
+  ]
+ }
+}

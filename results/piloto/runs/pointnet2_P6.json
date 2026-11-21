@@ -1,0 +1,59 @@
+{
+ "arch": "pointnet2",
+ "arquitetura": "PointNet++",
+ "pre": {
+  "id": "P6",
+  "nome": "Filtro gaussiano",
+  "params": {
+   "sigma_px": 1.0,
+   "modo": "wrap"
+  }
+ },
+ "epocas": 4,
+ "batch": 16,
+ "lr": 0.001,
+ "seed": 0,
+ "tau_gt": 0.15074408054351807,
+ "bloco": 64,
+ "passo_inferencia": 64,
+ "n_parametros": 417761,
+ "n_frames_treino": 192,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 1.2147498081127803,
+   "perda_valid": 1.3940131346384683,
+   "tempo_s": 39.60724902153015
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 0.6904648939768473,
+   "perda_valid": 1.2858410040537516,
+   "tempo_s": 80.10707068443298
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 0.5471979429324468,
+   "perda_valid": 1.2823688983917236,
+   "tempo_s": 120.14186024665833
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 0.4817694773276647,
+   "perda_valid": 0.5288153449694316,
+   "tempo_s": 178.06742572784424
+  }
+ ],
+ "tempo_treino_s": 178.06751799583435,
+ "latencia_rede_ms_frame": 364.6612380909408,
+ "latencia_pre_ms_frame": 0.15497207641601562,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}

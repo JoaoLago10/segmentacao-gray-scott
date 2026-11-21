@@ -1,0 +1,40 @@
+\section{Introdução}
+\label{sec:intro}
+
+Sistemas de reação-difusão produzem, a partir de um estado quase homogêneo, estruturas espaciais
+organizadas (pontos, listras, labirintos, espirais e ``planadores'') cuja forma depende de poucos
+parâmetros \cite{turing1952,pearson1993}. A pergunta que orienta este trabalho é a mesma para
+todos os fluidos estudados pela turma: \emph{onde estão as estruturas de interesse e como elas
+evoluem ao longo do tempo?} Responder a ela exige uma segmentação por pixel (por ponto), e não
+apenas a classificação do regime de cada simulação.
+
+O fluido escolhido pela equipe é o \texttt{gray\_scott\_reaction\_diffusion} do The Well
+\cite{ohana2024well}: 1200 trajetórias do modelo de Gray-Scott \cite{grayscott1984,pearson1993}
+em seis regimes de parâmetros, com 1001 instantes de $128\times128$ pixels cada. O conjunto não
+traz máscaras de segmentação; o ground truth (GT) é derivado da concentração $B$ por um critério
+físico documentado (Seção~\ref{sec:gt}).
+
+Seguindo a orientação do professor, as redes de segmentação são \textbf{arquiteturas de nuvem de
+pontos}. Cada frame é convertido num conjunto não ordenado de pontos $(x,y,a)$, o que permite
+avaliar redes que não pressupõem uma grade regular (PointNet \cite{qi2017pointnet}, PointNet++
+\cite{qi2017pointnet2} e DGCNN \cite{wang2019dgcnn}) e torna o protocolo comparável entre fluidos
+com resoluções e geometrias diferentes.
+
+O experimento é o mesmo para todos os alunos: dez pré-processamentos (P1--P10), três arquiteturas
+e dez pós-processamentos (Q1--Q10), avaliados em quatro condições:
+\begin{enumerate}
+  \item sem pré e sem pós (referência);
+  \item somente pré (efeito isolado de P1--P10);
+  \item somente pós (efeito isolado de Q1--Q10);
+  \item pré e pós (as $10\times3\times10 = 300$ combinações).
+\end{enumerate}
+
+As contribuições são:
+\begin{itemize}
+  \item um protocolo reprodutível de segmentação do Gray-Scott como nuvem de pontos, com GT físico,
+    divisão oficial por trajetória e operações que respeitam o contorno periódico;
+  \item a análise de \emph{por que} cada pré e pós-processamento melhora ou piora a segmentação,
+    relacionando o efeito ao mecanismo da arquitetura e à física de cada regime;
+  \item tabelas de resultados em formato padronizado (CSV e \LaTeX), prontas para a junção com os
+    demais fluidos no artigo de benchmark.
+\end{itemize}

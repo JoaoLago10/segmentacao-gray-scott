@@ -1,0 +1,56 @@
+{\scriptsize\setlength{\tabcolsep}{2.5pt}
+\begin{longtable}{llllcccccc}
+\caption{Resultados no teste nas condições sem pré e sem pós, somente pré e somente pós (média por trajetória $\pm$ semi-amplitude do IC de 95\% por bootstrap). Resultados do \textbf{piloto} reduzido (CPU), apenas para validar o pipeline.}\label{tab:condicoes123}\\
+\toprule
+Condição & Pré & Arquitetura & Pós & IoU & Dice & Precision & Recall & Lat. (ms) & Mem. (MB) \\
+\midrule
+\endfirsthead
+\toprule
+Condição & Pré & Arquitetura & Pós & IoU & Dice & Precision & Recall & Lat. (ms) & Mem. (MB) \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+Sem pré e sem pós & nenhum & PointNet & nenhum & 0,837 $\pm$ 0,034 & 0,909 $\pm$ 0,020 & 0,868 $\pm$ 0,041 & 0,963 $\pm$ 0,019 & 322,2 & -- \\
+Sem pré e sem pós & nenhum & PointNet++ & nenhum & 0,797 $\pm$ 0,014 & 0,887 $\pm$ 0,009 & 0,835 $\pm$ 0,016 & 0,948 $\pm$ 0,014 & 392,3 & -- \\
+Sem pré e sem pós & nenhum & DGCNN & nenhum & 0,903 $\pm$ 0,019 & 0,948 $\pm$ 0,011 & 0,932 $\pm$ 0,024 & 0,969 $\pm$ 0,017 & 1642,1 & -- \\
+Somente pré & P1 & PointNet & nenhum & 0,837 $\pm$ 0,035 & 0,909 $\pm$ 0,021 & 0,923 $\pm$ 0,041 & 0,908 $\pm$ 0,035 & 308,1 & -- \\
+Somente pré & P6 & PointNet & nenhum & 0,762 $\pm$ 0,021 & 0,865 $\pm$ 0,013 & 0,816 $\pm$ 0,038 & 0,936 $\pm$ 0,039 & 346,5 & -- \\
+Somente pré & P9 & PointNet & nenhum & 0,811 $\pm$ 0,034 & 0,894 $\pm$ 0,021 & 0,871 $\pm$ 0,040 & 0,932 $\pm$ 0,036 & 307,2 & -- \\
+Somente pré & P1 & PointNet++ & nenhum & 0,816 $\pm$ 0,014 & 0,898 $\pm$ 0,009 & 0,853 $\pm$ 0,011 & 0,949 $\pm$ 0,008 & 372,5 & -- \\
+Somente pré & P6 & PointNet++ & nenhum & 0,775 $\pm$ 0,018 & 0,872 $\pm$ 0,011 & 0,814 $\pm$ 0,020 & 0,942 $\pm$ 0,013 & 364,9 & -- \\
+Somente pré & P9 & PointNet++ & nenhum & 0,796 $\pm$ 0,017 & 0,886 $\pm$ 0,011 & 0,837 $\pm$ 0,019 & 0,943 $\pm$ 0,013 & 372,0 & -- \\
+Somente pré & P1 & DGCNN & nenhum & 0,920 $\pm$ 0,017 & 0,958 $\pm$ 0,009 & 0,939 $\pm$ 0,016 & 0,978 $\pm$ 0,009 & 1629,2 & -- \\
+Somente pré & P6 & DGCNN & nenhum & 0,875 $\pm$ 0,024 & 0,932 $\pm$ 0,014 & 0,912 $\pm$ 0,031 & 0,959 $\pm$ 0,018 & 1702,8 & -- \\
+Somente pré & P9 & DGCNN & nenhum & 0,878 $\pm$ 0,022 & 0,934 $\pm$ 0,013 & 0,920 $\pm$ 0,029 & 0,953 $\pm$ 0,021 & 1653,6 & -- \\
+Somente pós & nenhum & PointNet & Q1 & 0,847 $\pm$ 0,032 & 0,916 $\pm$ 0,018 & 0,908 $\pm$ 0,036 & 0,932 $\pm$ 0,027 & 322,2 & -- \\
+Somente pós & nenhum & PointNet & Q2 & 0,826 $\pm$ 0,033 & 0,903 $\pm$ 0,020 & 0,872 $\pm$ 0,039 & 0,947 $\pm$ 0,026 & 323,5 & -- \\
+Somente pós & nenhum & PointNet & Q3 & 0,834 $\pm$ 0,034 & 0,907 $\pm$ 0,021 & 0,865 $\pm$ 0,041 & 0,963 $\pm$ 0,019 & 323,5 & -- \\
+Somente pós & nenhum & PointNet & Q4 & 0,824 $\pm$ 0,033 & 0,902 $\pm$ 0,020 & 0,869 $\pm$ 0,040 & 0,947 $\pm$ 0,026 & 324,7 & -- \\
+Somente pós & nenhum & PointNet & Q5 & 0,837 $\pm$ 0,034 & 0,909 $\pm$ 0,020 & 0,868 $\pm$ 0,041 & 0,963 $\pm$ 0,019 & 323,7 & -- \\
+Somente pós & nenhum & PointNet & Q6 & 0,837 $\pm$ 0,034 & 0,909 $\pm$ 0,020 & 0,868 $\pm$ 0,041 & 0,963 $\pm$ 0,019 & 323,7 & -- \\
+Somente pós & nenhum & PointNet & Q7 & 0,837 $\pm$ 0,034 & 0,909 $\pm$ 0,020 & 0,869 $\pm$ 0,040 & 0,962 $\pm$ 0,019 & 323,6 & -- \\
+Somente pós & nenhum & PointNet & Q8 & 0,835 $\pm$ 0,034 & 0,908 $\pm$ 0,020 & 0,906 $\pm$ 0,036 & 0,920 $\pm$ 0,034 & 342,1 & -- \\
+Somente pós & nenhum & PointNet & Q9 & 0,829 $\pm$ 0,034 & 0,905 $\pm$ 0,021 & 0,876 $\pm$ 0,042 & 0,946 $\pm$ 0,026 & 586,9 & -- \\
+Somente pós & nenhum & PointNet & Q10 & 0,700 $\pm$ 0,104 & 0,799 $\pm$ 0,083 & 0,795 $\pm$ 0,075 & 0,810 $\pm$ 0,096 & 322,6 & -- \\
+Somente pós & nenhum & PointNet++ & Q1 & 0,808 $\pm$ 0,016 & 0,893 $\pm$ 0,010 & 0,876 $\pm$ 0,016 & 0,914 $\pm$ 0,021 & 392,3 & -- \\
+Somente pós & nenhum & PointNet++ & Q2 & 0,804 $\pm$ 0,014 & 0,891 $\pm$ 0,009 & 0,855 $\pm$ 0,016 & 0,933 $\pm$ 0,019 & 393,1 & -- \\
+Somente pós & nenhum & PointNet++ & Q3 & 0,794 $\pm$ 0,013 & 0,885 $\pm$ 0,008 & 0,829 $\pm$ 0,015 & 0,951 $\pm$ 0,014 & 393,1 & -- \\
+Somente pós & nenhum & PointNet++ & Q4 & 0,801 $\pm$ 0,013 & 0,889 $\pm$ 0,008 & 0,851 $\pm$ 0,016 & 0,934 $\pm$ 0,019 & 393,8 & -- \\
+Somente pós & nenhum & PointNet++ & Q5 & 0,797 $\pm$ 0,014 & 0,887 $\pm$ 0,009 & 0,835 $\pm$ 0,016 & 0,947 $\pm$ 0,014 & 393,2 & -- \\
+Somente pós & nenhum & PointNet++ & Q6 & 0,797 $\pm$ 0,014 & 0,887 $\pm$ 0,009 & 0,835 $\pm$ 0,016 & 0,948 $\pm$ 0,014 & 393,7 & -- \\
+Somente pós & nenhum & PointNet++ & Q7 & 0,797 $\pm$ 0,014 & 0,887 $\pm$ 0,009 & 0,835 $\pm$ 0,016 & 0,947 $\pm$ 0,014 & 393,5 & -- \\
+Somente pós & nenhum & PointNet++ & Q8 & 0,814 $\pm$ 0,014 & 0,897 $\pm$ 0,009 & 0,865 $\pm$ 0,017 & 0,934 $\pm$ 0,019 & 409,6 & -- \\
+Somente pós & nenhum & PointNet++ & Q9 & 0,847 $\pm$ 0,018 & 0,917 $\pm$ 0,011 & 0,883 $\pm$ 0,022 & 0,956 $\pm$ 0,016 & 659,5 & -- \\
+Somente pós & nenhum & PointNet++ & Q10 & 0,655 $\pm$ 0,095 & 0,769 $\pm$ 0,081 & 0,773 $\pm$ 0,047 & 0,782 $\pm$ 0,107 & 393,3 & -- \\
+Somente pós & nenhum & DGCNN & Q1 & 0,906 $\pm$ 0,019 & 0,950 $\pm$ 0,010 & 0,947 $\pm$ 0,021 & 0,958 $\pm$ 0,020 & 1642,1 & -- \\
+Somente pós & nenhum & DGCNN & Q2 & 0,888 $\pm$ 0,021 & 0,940 $\pm$ 0,012 & 0,937 $\pm$ 0,022 & 0,947 $\pm$ 0,025 & 1643,3 & -- \\
+Somente pós & nenhum & DGCNN & Q3 & 0,901 $\pm$ 0,019 & 0,947 $\pm$ 0,011 & 0,929 $\pm$ 0,024 & 0,970 $\pm$ 0,017 & 1643,2 & -- \\
+Somente pós & nenhum & DGCNN & Q4 & 0,886 $\pm$ 0,021 & 0,939 $\pm$ 0,011 & 0,934 $\pm$ 0,023 & 0,948 $\pm$ 0,025 & 1643,4 & -- \\
+Somente pós & nenhum & DGCNN & Q5 & 0,902 $\pm$ 0,019 & 0,948 $\pm$ 0,011 & 0,932 $\pm$ 0,024 & 0,969 $\pm$ 0,017 & 1643,3 & -- \\
+Somente pós & nenhum & DGCNN & Q6 & 0,902 $\pm$ 0,019 & 0,948 $\pm$ 0,011 & 0,932 $\pm$ 0,024 & 0,969 $\pm$ 0,017 & 1643,2 & -- \\
+Somente pós & nenhum & DGCNN & Q7 & 0,902 $\pm$ 0,019 & 0,948 $\pm$ 0,011 & 0,932 $\pm$ 0,024 & 0,969 $\pm$ 0,017 & 1643,5 & -- \\
+Somente pós & nenhum & DGCNN & Q8 & 0,902 $\pm$ 0,019 & 0,948 $\pm$ 0,011 & 0,941 $\pm$ 0,022 & 0,959 $\pm$ 0,020 & 1659,3 & -- \\
+Somente pós & nenhum & DGCNN & Q9 & 0,889 $\pm$ 0,020 & 0,941 $\pm$ 0,011 & 0,940 $\pm$ 0,022 & 0,945 $\pm$ 0,020 & 1900,6 & -- \\
+Somente pós & nenhum & DGCNN & Q10 & 0,732 $\pm$ 0,113 & 0,817 $\pm$ 0,089 & 0,868 $\pm$ 0,059 & 0,786 $\pm$ 0,108 & 1642,5 & -- \\
+\end{longtable}}

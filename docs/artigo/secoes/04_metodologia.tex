@@ -1,0 +1,127 @@
+\section{Metodologia}
+\label{sec:metodo}
+
+\subsection{Pipeline}
+A Figura~\ref{fig:pipeline} resume o pipeline. Os campos são lidos por requisições de intervalo
+de bytes diretamente dos HDF5 do The Well (os arquivos são contíguos e sem compressão), sem
+baixar os 154 GB do conjunto.
+
+\begin{figure}[t]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  node distance=4mm and 5mm,
+  box/.style={draw, rounded corners=2pt, align=center, font=\scriptsize, minimum height=10mm,
+              text width=21mm, fill=#1},
+  box/.default=gray!8,
+  arr/.style={-{Stealth[length=2mm]}, thick, gray!70!black}]
+  \node[box=blue!8] (well) {The Well\\HDF5 $A,B$\\$1001\times128\times128$};
+  \node[box, right=of well] (split) {Divisão oficial\\por trajetória\\(treino/val./teste)};
+  \node[box, right=of split] (sub) {Seleção de frames\\exclui $t=0$ e\\padrão morto};
+  \node[box=orange!12, above right=2mm and 5mm of sub] (gt) {GT: $M=\mathbb{1}[B>\tau]$\\$\tau$ = Otsu (treino)};
+  \node[box=green!10, below right=2mm and 5mm of sub] (pre) {Pré P0--P10\\sobre $A$\\(ajuste no treino)};
+  \node[box=green!10, right=18mm of sub] (pc) {Nuvem de pontos\\$(x,y,a)$, blocos\\$64\times64$ periódicos};
+  \node[box=violet!10, right=of pc] (net) {PointNet\\PointNet++\\DGCNN\\(20 épocas)};
+  \node[box, right=of net] (prob) {Probabilidade\\por ponto $\to$\\grade (média\\de blocos)};
+  \node[box=green!10, right=of prob] (pos) {Pós Q0--Q10\\(parâmetros\\na validação)};
+  \node[box=blue!8, right=of pos] (met) {IoU, Dice, P, R\\temporais, custo\\IC 95\% $\to$ CSV};
+  \draw[arr] (well) -- (split);
+  \draw[arr] (split) -- (sub);
+  \draw[arr] (sub) |- (gt);
+  \draw[arr] (sub) |- (pre);
+  \draw[arr] (pre) -| (pc);
+  \draw[arr] (gt) -| (pc);
+  \draw[arr] (pc) -- (net);
+  \draw[arr] (net) -- (prob);
+  \draw[arr] (prob) -- (pos);
+  \draw[arr] (pos) -- (met);
+  \draw[arr, dashed] (gt.east) -- ++(78mm,0) -| (met.north);
+\end{tikzpicture}}
+\caption{Pipeline do experimento. Os blocos em verde são os fatores variados (pré, pós); o GT
+(laranja) é fixo e independente do modelo.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Dados e divisão}
+Usamos a divisão oficial do The Well, por trajetória, de modo que nenhuma simulação aparece em
+mais de uma partição. Os seis regimes estão nas três partições (160/20/20 trajetórias por regime).
+Por custo computacional, selecionamos de forma determinística trajetórias igualmente espaçadas nos
+índices, o que cobre os dois tipos de condição inicial, que ocupam metades distintas de cada
+arquivo (Tabela~\ref{tab:dados}).
+
+\begin{table}[t]\centering\small
+\caption{Subconjuntos usados (por regime). Índice de frame $n$ corresponde a $t = 10\,n$ s.}
+\label{tab:dados}
+\begin{tabular}{lcl}
+\toprule
+Partição & Trajetórias & Frames \\
+\midrule
+Treino & 24 de 160 & $n\in\{1,2,4,6,8,10,15,20,30,\dots,100\}$ (16; denso no transiente) \\
+Validação & 5 de 20 & $n = 20, 40, \dots, 1000$ (50) \\
+Teste & 10 de 20 & $n = 20, 40, \dots, 1000$ (50) \\
+Tabela visual & trajetória 0 do teste & $n\in\{0, 40, 500, 1000\}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ground truth}
+\label{sec:gt}
+O professor pediu que o GT fosse ``uma imagem em um frame médio que caracterize o fluido''. A ficha
+da Etapa 2 comparou três interpretações. Uma máscara fixa de um instante intermediário e a média
+temporal limiarizada falham nos regimes móveis: o IoU com o instante final fica entre 0,08 e 0,17
+em Gliders e Spirals, e a média temporal fica vazia. Adotamos então a interpretação em que o frame
+médio \emph{define o critério} e a máscara é gerada em cada frame:
+\begin{equation}
+  M(x,y,t) = \mathbb{1}\big[B(x,y,t) > \tau\big],\qquad \tau = 0{,}1507,
+\end{equation}
+em que $\tau$ é o limiar de Otsu \cite{otsu1979} do histograma de $B$ em todos os regimes do treino
+($t>0$), que cai no vale entre o modo do fundo ($B\approx0$) e o do padrão ($B\approx0{,}25$ a
+$0{,}45$). Um único $\tau$ para o fluido facilita a junção com a turma. Na validação, ele concorda
+com $\tau$ por regime com IoU de 0,86 a 0,98, exceto em Gliders (0,74).
+
+\paragraph{Vazamento de rótulo} Se $B$ fosse entrada, a rede só reaprenderia um limiar (IoU = 1).
+Por isso \textbf{só $A$ entra na rede} e o rótulo vem de $B$: a rede precisa inferir a estrutura
+de $B$ a partir de $A$. O problema é quase trivial em Bubbles e Spots, onde o melhor limiar único
+em $A$ atinge IoU 0,97 a 0,98, e não trivial em Gliders e Spirals (0,81 a 0,85), sobretudo com um
+limiar comum a todos os regimes.
+
+\paragraph{Frames excluídos} $t=0$ (condições iniciais de Fourier com $A$ até 1,52 e $B$ negativo)
+e os frames sem padrão ($\max B < 10^{-6}$), em que o padrão de Gliders e Spirals morreu e IoU e
+Dice seriam indefinidos.
+
+\subsection{Resolução}
+\label{sec:resolucao}
+A orientação foi aproximar a resolução de todos os fluidos da menor resolução usada no The Well,
+mantendo a proporção e sem retirar as propriedades do fluido. O Gray-Scott já está em
+$128\times128$, a menor resolução 2D do conjunto, e com proporção $1{:}1$. O fator de redução é,
+portanto, 1, e \textbf{não há reamostragem}. Reduzir para $120\times120$ exigiria um fator não
+inteiro ($0{,}9375$), com interpolação e filtragem \emph{antialiasing}, sobre estruturas de 4 a 8
+pixels de largura. Pelo critério de Nyquist, isso borraria as interfaces e fundiria manchas
+vizinhas, o que alteraria justamente a propriedade a segmentar. A nuvem de pontos tem $N=16\,384$
+pontos por frame.
+
+\subsection{Treinamento}
+Cada amostra de treino é um bloco periódico $64\times64$ (4096 pontos) recortado em posição
+aleatória do frame, como os blocos de cenas grandes no S3DIS \cite{armeni2016}. O aumento de dados
+(rotações de $90^\circ$, reflexões, translações circulares e permutação aleatória dos pontos)
+preserva a física, porque os campos são escalares e o domínio é periódico e isotrópico. Todas as
+arquiteturas são treinadas por \textbf{20 épocas} (padronizado), com AdamW \cite{loshchilov2019}
+(taxa máxima $10^{-3}$, \emph{weight decay} $10^{-4}$), política \emph{one-cycle} \cite{smith2019}
+e perda $\mathcal{L} = \mathrm{BCE} + (1-\mathrm{Dice}_{\text{soft}})$ \cite{milletari2016}, que
+compensa o desbalanceamento de Gliders (5\% de padrão). A semente é fixa (0), e o modelo avaliado é
+o da época 20. Na inferência, o frame é coberto por 16 blocos $64\times64$ com passo 32 (cada ponto
+é visto por 4 blocos), e as probabilidades são promediadas.
+
+\subsection{Condições e seleção de parâmetros}
+São 33 treinamentos (3 arquiteturas $\times$ 11 entradas: P0 e P1--P10). As probabilidades de
+validação e teste são salvas, e os 11 pós-processamentos (Q0--Q10) são aplicados sem retreinar,
+o que dá $3\times11\times11 = 363$ linhas de resultado: 3 de referência, 30 somente pré, 30 somente
+pós e 300 pré e pós. Os parâmetros de cada Q são escolhidos na validação, e o teste é usado uma
+única vez. Nas tabelas-resumo, a ``melhor'' configuração de cada condição também é escolhida pelo
+Dice de validação.
+
+\subsection{Formato padronizado das tabelas}
+As tabelas seguem a ordem de colunas acordada com a turma: Fluido, Condição, Pré, Arquitetura,
+Pós, IoU, Dice, Precision, Recall (média $\pm$ IC 95\%, 3 casas), Latência (ms) e Memória (MB).
+As linhas seguem a ordem sequencial condição $\to$ arquitetura $\to$ pré $\to$ pós. O mesmo
+esquema é salvo em \texttt{results/exp/metricas\_padrao.csv}, para a junção com os demais fluidos.

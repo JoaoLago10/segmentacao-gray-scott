@@ -1,0 +1,21 @@
+\section{Conclusão}
+\label{sec:conclusao}
+
+Apresentamos um protocolo de segmentação dos padrões de Turing do Gray-Scott em que cada frame é
+tratado como uma nuvem de pontos $(x,y,a)$, com GT físico ($B>\tau$), entrada restrita a $A$ para
+evitar vazamento de rótulo, operações periódicas, divisão oficial por trajetória e seleção de
+parâmetros só na validação. A análise mecanística prevê três resultados:
+\begin{enumerate}
+  \item normalizações afins são neutras em redes com BN;
+  \item filtros espaciais não ajudam em dados de simulação sem ruído, e o gaussiano piora a
+    fronteira;
+  \item pós-processamentos que trazem contexto espacial ou o próprio dado (CRF) beneficiam mais
+    a rede sem vizinhança (PointNet).
+\end{enumerate}
+No piloto, (2) se confirmou (o gaussiano foi o pior pré nas três redes, com a maior perda no
+PointNet) e (3) foi refutada: o CRF ajudou o PointNet++, cujo erro dominante é FP de borda, e não o
+PointNet. O resultado (1) só se confirmou para o PointNet, porque em poucas épocas o Z-score
+melhorou a otimização das redes com vizinhança. O DGCNN foi a melhor arquitetura, e a filtragem
+temporal só é segura nos regimes estáticos.
+\revisar{Atualizar com os números finais do experimento completo.} As tabelas estão no formato
+padronizado da turma, prontas para o artigo de benchmark entre fluidos.

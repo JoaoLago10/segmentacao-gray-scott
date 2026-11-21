@@ -5,7 +5,7 @@
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\graphicspath{{figs/}}
+\graphicspath{{figs/}{../artigo/figs/piloto/}}
 
 \usetheme{Madrid}
 \setbeamertemplate{navigation symbols}{}
@@ -29,7 +29,7 @@
       \textbf{Pergunta:} onde estão as estruturas e como evoluem no tempo?
       \begin{itemize}
         \item Segmentação 2D dos padrões de Turing.
-        \item 10 pré (P1--P10) $\times$ 3 redes (U-Net, SegFormer, Mask2Former) $\times$ 10 pós (Q1--Q10) = 300 combinações.
+        \item 10 pré (P1--P10) $\times$ 3 redes de \textbf{nuvem de pontos} (PointNet, PointNet++, DGCNN; 20 épocas) $\times$ 10 pós (Q1--Q10) = 300 combinações.
         \item Quatro condições: sem pré/pós, só pré, só pós, pré + pós.
         \item Dados: campos $A$ e $B$, $128 \times 128$, periódicos, 1001 instantes, 1200 trajetórias.
       \end{itemize}
@@ -63,10 +63,12 @@
     Etapa & Situação \\
     \midrule
     1. Auditoria do dataset & \textbf{concluída} \\
-    2. Ground truth & \textbf{aguarda professor} \\
-    3. Software \quad 4. Piloto \quad 5. Experimentos & pendentes \\
-    6. Tabelas & rascunho da tabela visual \\
-    7. Artigo & pendente \\
+    2. Ground truth & \textbf{definido}: $B>\tau$ por frame \\
+    3. Software (P, Q, redes, métricas) & \textbf{concluído} (testes) \\
+    4. Piloto (CPU) & \textbf{concluído} \\
+    5. Experimento completo (33 treinos) & em GPU (Colab/Kaggle) \\
+    6. Tabelas e figuras & geradas automaticamente \\
+    7. Artigo (\LaTeX, elsarticle) & redigido; números finais pendentes \\
     \bottomrule
   \end{tabular}
 
@@ -150,22 +152,67 @@
       (com $A$, o melhor limiar dá IoU de 0,81 a 0,98, conforme o regime).
     \item Frames sem padrão e $t = 0$ excluídos.
     \item Sem pré = dados brutos; sem pós = limiar fixo 0,5.
-    \item Definição do ground truth: \textbf{aguardando o professor}.
+    \item \textbf{GT:} $M=\mathbb{1}[B>\tau]$, $\tau=0{,}151$ (Otsu global do treino), gerado em cada frame
+      (o ``frame médio'' define o critério).
+    \item \textbf{Resolução:} $128\times128$ mantida (já é o menor fluido do The Well; reduzir apagaria estruturas de 4--8 px).
+    \item \textbf{Redes:} PointNet, PointNet++ e DGCNN, 20 épocas.
   \end{itemize}
 \end{frame}
 
 % ------------------------------------------------------------
-\begin{frame}{Perguntas ao professor e próximos passos}
-  \textbf{Perguntas}
-  \begin{enumerate}
-    \item ``Frame médio'': instante intermediário, média de instantes ou critério aplicado a cada frame?
-    \item GT por regime ou único para o fluido?
-    \item Com GT estático, as métricas temporais e o Q10 continuam?
-    \item O Gray-Scott (reação-difusão) é aceito como ``fluido''?
-  \end{enumerate}
+\begin{frame}{Frame como nuvem de pontos}
+  \begin{itemize}
+    \item Cada pixel vira um ponto $\mathbf{p}_i=(x_i,y_i,a_i)$, com $a_i=\mathcal{P}(A)$ (campo $A$ pré-processado).
+    \item Rótulo do ponto: $\mathbb{1}[B_i>\tau]$. Só $A$ entra na rede, para evitar vazamento de rótulo.
+    \item Treino em blocos periódicos $64\times64$ (4096 pontos); inferência com 16 blocos sobrepostos.
+    \item Aumento de dados: rotação de $90^\circ$, reflexão, translação circular e permutação dos pontos.
+  \end{itemize}
+  \vspace{0.3em}
+  \begin{tabular}{lll}
+    \toprule
+    Rede & Ideia & Contexto espacial \\
+    \midrule
+    PointNet & MLP por ponto + max-pool global & nenhum (só global) \\
+    PointNet++ & set abstraction hierárquico (FPS + $k$-NN) & local, multiescala \\
+    DGCNN & EdgeConv em grafo $k$-NN dinâmico & local + semântico \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
 
-  \vspace{0.5em}
-  \textbf{Próximos passos:} fechar o GT $\rightarrow$ código e piloto $\rightarrow$ 33 treinos $\rightarrow$ tabelas e artigo.
+% ------------------------------------------------------------
+\begin{frame}{Quatro condições e protocolo}
+  \begin{itemize}
+    \item Sem pré e sem pós $\cdot$ somente pré (P1--P10) $\cdot$ somente pós (Q1--Q10) $\cdot$ pré e pós (300).
+    \item 33 treinos (3 redes $\times$ 11 entradas); os pós são aplicados às probabilidades salvas, sem retreinar.
+    \item Parâmetros de pré ajustados no treino e de pós na validação; o teste é usado uma vez.
+    \item Operações espaciais e componentes conexos \textbf{periódicos}.
+    \item Métricas por trajetória: IoU, Dice, Precision, Recall (IC 95\% bootstrap), temporais, latência e memória.
+  \end{itemize}
+  \textbf{Hipóteses:} normalizações afins são neutras (BN); filtros não ajudam em dados sem ruído
+  (gaussiano piora); CRF ajuda mais a PointNet.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Piloto (CPU, reduzido): mapa pré $\times$ pós}
+  \centering
+  \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{heatmap_dice.png}
+
+  \small Piloto apenas para validar o pipeline (4 épocas, poucos dados); números finais em GPU.
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Tabela visual (piloto): Spirals}
+  \centering
+  \includegraphics[height=0.9\textheight]{tabela_visual_spirals.png}
+\end{frame}
+
+% ------------------------------------------------------------
+\begin{frame}{Próximos passos}
+  \begin{enumerate}
+    \item Rodar o experimento completo em GPU (\texttt{notebooks/executar\_gpu.ipynb}, $\sim$5--6 h numa T4).
+    \item Trocar \texttt{\textbackslash resdir} para \texttt{exp} no artigo e completar a discussão com os números.
+    \item Juntar as tabelas padronizadas com as dos outros fluidos (CSV no mesmo esquema).
+  \end{enumerate}
 \end{frame}
 
 \end{document}

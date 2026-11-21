@@ -1,0 +1,43 @@
+# Configuração única do experimento P2 de PDI (Gray-Scott, nuvem de pontos).
+# Qualquer mudança aqui deve ser registrada no artigo (Seção de Metodologia).
+seed: 0
+fluido: gray_scott_reaction_diffusion
+
+# Resolução: mantida em 128 x 128 (já é o menor fluido 2D do The Well; ver artigo, Seção 3).
+resolucao: [128, 128]
+
+ground_truth:
+  campo: B
+  criterio: "B > tau, tau = Otsu global do treino (t > 0)"   # tau lido de results/gt/candidatos.json
+entrada: A        # decisão G3: só A entra na rede; o GT vem de B
+
+dados:
+  dir: data/processed/exp
+  # Índices de frame (t = 10 * índice, em s). t = 0 é excluído do treino/avaliação.
+  train:
+    trajs_por_regime: 24          # de 160, igualmente espaçadas (cobre os dois tipos de condição inicial)
+    frames: [1, 2, 4, 6, 8, 10, 15, 20, 30, 40, 50, 60, 70, 80, 90, 100]   # x10 = 10..1000 s, denso no transiente
+  valid:
+    trajs_por_regime: 5
+    frames: {inicio: 20, fim: 1000, passo: 20}    # t = 200 .. 10000 s (50 frames)
+  test:
+    trajs_por_regime: 10
+    frames: {inicio: 20, fim: 1000, passo: 20}
+  visual:                          # tabela visual: t = 0, 2 intermediários e final
+    split: test
+    traj: 0
+    frames: [0, 40, 500, 1000]     # t = 0, 400, 5000, 10000 s
+
+nuvem:
+  bloco: 64          # treino em blocos periódicos 64 x 64 = 4096 pontos (como os blocos do S3DIS)
+  passo_inferencia: 32   # blocos sobrepostos na inferência; cada pixel é coberto por 4 blocos
+  atributos: [x, y, a]
+
+treino:
+  epocas: 20         # padronizado pelo professor
+  lr: 0.001
+  weight_decay: 0.0001
+  batch: {pointnet: 32, pointnet2: 16, dgcnn: 8}
+  perda: "BCE + Dice"
+  aumento: "rotações de 90 graus, reflexões, recorte periódico aleatório, permutação dos pontos"
+  workers: 2
