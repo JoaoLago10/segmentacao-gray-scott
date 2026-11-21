@@ -1,5 +1,6 @@
-# Testado com Python 3.14.4 (CPU). Para GPU, instalar torch/torchvision da build CUDA correspondente.
-numpy==2.5.4
+# Testado com Python 3.12 (CPU) e 3.14. Para GPU, instalar torch da build CUDA correspondente
+# (no Colab/Kaggle o torch pré-instalado já serve).
+numpy==2.5.5
 scipy==1.18.1
 h5py==3.16.0
 fsspec==2026.9.0
@@ -8,11 +9,8 @@ requests==2.34.2
 huggingface_hub==2.4.0
 matplotlib==3.11.2
 pandas==3.1.1
-PyYAML==6.0.3
+PyYAML==6.0.4
 scikit-image==0.26.0
 PyWavelets==1.10.0
 torch==2.15.0
-torchvision==0.29.2
-transformers==5.22.2
-timm==1.0.31
 pytest==9.2.0

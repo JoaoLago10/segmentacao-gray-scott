@@ -1,0 +1,56 @@
+{
+ "arch": "pointnet",
+ "arquitetura": "PointNet",
+ "pre": {
+  "id": "P0",
+  "nome": "Nenhum (dados brutos)",
+  "params": {}
+ },
+ "epocas": 4,
+ "batch": 32,
+ "lr": 0.001,
+ "seed": 0,
+ "tau_gt": 0.15074408054351807,
+ "bloco": 64,
+ "passo_inferencia": 64,
+ "n_parametros": 868929,
+ "n_frames_treino": 192,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 1.412928859392802,
+   "perda_valid": 1.4108087062835692,
+   "tempo_s": 59.63846802711487
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 0.9237402578194936,
+   "perda_valid": 1.3052770296732585,
+   "tempo_s": 120.57852435112
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 0.688271552324295,
+   "perda_valid": 1.3445897261301676,
+   "tempo_s": 179.00523853302002
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 0.6189302504062653,
+   "perda_valid": 0.6204879760742188,
+   "tempo_s": 254.4505684375763
+  }
+ ],
+ "tempo_treino_s": 254.4506390094757,
+ "latencia_rede_ms_frame": 322.16092609087355,
+ "latencia_pre_ms_frame": 0.017958382765452068,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}

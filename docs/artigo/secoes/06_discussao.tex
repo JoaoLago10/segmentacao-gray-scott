@@ -1,0 +1,198 @@
+\section{Discussão: por que a segmentação melhora ou piora}
+\label{sec:discussao}
+
+A discussão parte de três fatos estruturais do problema, que explicam a maior parte dos efeitos:
+\begin{enumerate}
+  \item \textbf{Os dados não têm ruído.} A simulação é espectral e determinística
+    (Seção~\ref{sec:grayscott}). Os filtros P6--P10 foram concebidos para remover ruído; aqui,
+    qualquer alteração que produzem é alteração de \emph{sinal}.
+  \item \textbf{O GT é um conjunto de nível de $B$ bruto, e $A$ é fortemente anticorrelacionado com
+    $B$.} A fronteira correta fica próxima de um conjunto de nível de $A$, mas o nível ideal varia
+    entre regimes ($A\approx0{,}45$ em Spirals a $0{,}72$ em Bubbles). Isso exige contexto, e não
+    apenas um limiar.
+  \item \textbf{As estruturas têm de 4 a 8 px de largura.} Operações com suporte de 3 px (filtros,
+    elementos estruturantes) atuam na mesma escala do padrão e não são ``pequenas'' em relação a ele.
+\end{enumerate}
+
+\subsection{Arquiteturas}
+O \textbf{PointNet} classifica cada ponto a partir de $(x_i,y_i,a_i)$ e do descritor global
+$\mathbf{g}$. Na prática ele aprende um limiar sobre $a$, ajustado por $\mathbf{g}$. O descritor
+global identifica implicitamente o regime (a distribuição de $a$ difere entre regimes), o que
+permite deslocar o limiar por regime, algo que um limiar fixo não faz. A rede não tem acesso à
+vizinhança, então não pode corrigir fronteiras deslocadas nem usar a forma das estruturas. Por isso
+é a arquitetura mais sensível a pré-processamentos que deslocam conjuntos de nível (P6) e a que mais
+pode ganhar com pós-processamentos que trazem contexto espacial (Q9, Q8).
+O \textbf{PointNet++} agrega vizinhanças hierárquicas com coordenadas relativas e enxerga formas
+de até dezenas de pixels nos níveis profundos. O \textbf{DGCNN} combina diferenças locais
+($\mathbf{x}_j-\mathbf{x}_i$, análogas a um gradiente) com grafos dinâmicos que ligam pontos
+semelhantes em todo o bloco. Espera-se que ambos superem o PointNet nas interfaces e nos regimes
+não triviais (Gliders e Spirals). \revisar{Confirmar com a Tabela~\ref{tab:resumo} e a
+Tabela~\ref{tab:regimes}: diferença de Dice na referência entre as redes, por regime.}
+
+\subsection{Pré-processamentos numéricos (P1--P5)}
+\paragraph{P1--P3 (afins)} Uma transformação $a' = \alpha a + \beta$ é absorvida pela primeira
+camada linear: $w_a a' + b = (w_a\alpha)a + (w_a\beta + b)$. A normalização em lote
+\cite{ioffe2015} logo em seguida remove o deslocamento e a escala por canal. Nas três redes, a
+classe de funções representáveis é idêntica com e sem P1--P3. No DGCNN, o primeiro grafo usa só
+$(x,y)$, e os grafos seguintes são calculados sobre características já normalizadas. O efeito
+esperado é \emph{nulo dentro do IC}. Diferenças só podem vir da otimização: a escala relativa de
+$a$ e das coordenadas muda a geometria da perda nos primeiros passos. \revisar{Verificar se
+$|\Delta\mathrm{Dice}|$ de P1--P3 em relação a P0 fica dentro do IC de 95\%.} Esse é um resultado
+negativo útil para o benchmark: para redes com BN, a normalização da entrada não é um fator
+experimental relevante.
+
+\paragraph{P4 (recorte)} Para $t>0$, $A\in[0{,}09;\,1{,}0006]$. O recorte em $Q_1$ e $Q_{99}$ só
+achata o fundo dos vales (interior das manchas) e o platô, longe do nível em que fica a fronteira.
+A fronteira é preservada, e o efeito esperado também é pequeno. Pode haver perda marginal onde a
+profundidade do vale distingue estruturas recém-formadas, por exemplo na divisão de Spots.
+
+\paragraph{P5 (log)} É monotônica e preserva os conjuntos de nível, então a mesma fronteira
+continua representável. A transformação expande a faixa de $A$ baixo (interior) e comprime a faixa
+perto de 1 (fundo). Isso aumenta a resolução numérica onde o limiar ideal é baixo (Spirals, Maze,
+$A\approx0{,}45$ a $0{,}53$) e reduz a resolução onde ele é alto (Bubbles, $0{,}72$). O efeito
+esperado é dependente do regime e de pequena magnitude. \revisar{Verificar na
+Tabela~\ref{tab:regimes}.}
+
+\subsection{Filtros espaciais (P6--P10)}
+\paragraph{P6 (gaussiano)} A resposta em frequência é $\hat{G}(q) = e^{-\sigma^2 q^2/2}$. Para
+estruturas com comprimento de onda $\lambda\approx8$ a $12$ px ($q = 2\pi/\lambda\approx0{,}5$ a
+$0{,}8$ px$^{-1}$) e $\sigma = 1$ px, a amplitude cai para 73 a 88\%. O contraste entre vale e platô
+diminui e os conjuntos de nível se deslocam: estruturas convexas e pequenas encolhem, e canais
+estreitos se fecham. Como o GT é definido sobre $B$ \emph{sem} filtro, surge um viés sistemático
+de fronteira que o PointNet não tem como corrigir. As redes com vizinhança podem compensar em parte,
+porque sem ruído a deconvolução de uma atenuação moderada é bem posta. Espera-se que P6 piore,
+mais no PointNet e nos regimes de estruturas pequenas (Gliders, Spots).
+
+\paragraph{P7 (mediana $3\times3$)} Remove apenas estruturas com menos de $\sim$2 px e arredonda
+cantos, preservando bordas retas. Para estruturas de 4 a 8 px, é quase a identidade, e o efeito
+esperado é pequeno, negativo nas pontas de Worms e nos Gliders.
+
+\paragraph{P8 (bilateral)} Com $\sigma_r = 0{,}05$, bem menor que o salto de $A$ na interface
+($\sim$0,5), o peso de intensidade anula a mistura através da borda. A suavização ocorre só dentro
+das regiões, que já são suaves. É praticamente a identidade, com efeito esperado nulo.
+
+\paragraph{P9 (Perona-Malik)} O gradiente de $A$ nas interfaces ($\sim$0,1 por px) é maior que
+$\kappa = 0{,}05$, de modo que $g(\|\nabla a\|)\approx e^{-4}$: a difusão para nas bordas e age
+onde $\|\nabla a\|<\kappa$. O resultado é um campo levemente ``achatado'' por partes, com bordas
+preservadas ou realçadas. Entre os filtros, é o único que poderia \emph{ajudar}, porque torna a
+fronteira mais abrupta e reduz a ambiguidade do limiar. É também o mais caro (10 iterações).
+
+\paragraph{P10 (wavelets)} O BayesShrink estima o ruído pela mediana dos coeficientes da subbanda
+$HH_1$. Sem ruído, essa subbanda contém só detalhes finos do próprio sinal, concentrados nas
+interfaces. O limiar resultante é pequeno, e o filtro é próximo da identidade, mas atenua
+justamente os detalhes de borda que existem.
+
+\paragraph{Síntese do pré} Os filtros espaciais trocam ruído (inexistente) por fidelidade de
+fronteira. A previsão é que nenhum filtro melhore de forma significativa e que P6 seja o pior.
+\revisar{Confirmar com a coluna ``nenhum'' da Figura~\ref{fig:heatmap} e com a seção ``Somente
+pré'' da Tabela~\ref{tab:condicoes123}.} Em dados experimentais de reação-difusão (por exemplo,
+\cite{lee1993}), com ruído de imagem real, a conclusão provavelmente se inverteria. Isso indica que
+o efeito do pré-processamento depende da origem dos dados, e não só do método.
+
+\subsection{Pós-processamentos (Q1--Q10)}
+\paragraph{Q1 (limiar)} A perda BCE + Dice não produz probabilidades calibradas. O termo Dice
+empurra as saídas para os extremos e desloca o ponto ótimo do limiar quando a classe positiva é
+rara (Gliders, 5\%). Como $\tau^*$ é escolhido para maximizar o Dice de validação, Q1 tende a um
+ganho pequeno e consistente, e funciona como \emph{piso} de comparação para os demais Q.
+
+\paragraph{Q2--Q4 (morfologia)} A abertura remove FP isolados (salpicos), mas também Gliders e
+pescoços de Spots em divisão, que têm a mesma escala do elemento estruturante. O fechamento une
+estruturas vizinhas e fecha os corredores de fundo de Maze, que são estreitos (52\% do domínio é
+padrão), o que gera FP. O efeito líquido depende do tipo de erro dominante da rede: abertura ajuda
+se o erro dominante for FP disperso, fechamento ajuda se forem lacunas.
+\revisar{Relacionar com Precision e Recall da Tabela~\ref{tab:condicoes123}.}
+
+\paragraph{Q5--Q7 (componentes)} São seguros quando o parâmetro escolhido é pequeno ($a_{\min}$ de
+2 a 4 px): eliminam FP espúrios sem tocar estruturas reais. Q6 tem um risco específico: em
+\emph{Bubbles}, os ``buracos'' são as próprias bolhas de fundo, um objeto físico. Preenchê-los
+apaga o padrão, e a validação tende a escolher $a_{\max}$ pequeno, o que limita o ganho. Q7
+(probabilidade média do componente) funciona como uma histerese: componentes com pouca confiança
+são removidos inteiros, em vez de pixel a pixel.
+
+\paragraph{Q8 (watershed)} Desloca a fronteira do nível 0,5 para a crista de $\|\nabla P\|$.
+Se a transição de $P$ for larga e simétrica, as duas coincidem e o efeito é nulo. Se for
+assimétrica (típico com BN e Dice), a crista do gradiente aproxima melhor a interface.
+
+\paragraph{Q9 (CRF)} É o único pós que reintroduz o \emph{dado} ($A$ bruto) no kernel de aparência.
+Como a fronteira do GT acompanha um conjunto de nível de $A$, o termo bilateral alinha as bordas da
+máscara às bordas de $A$ e corrige deslocamentos causados por um pré-processamento que borrou a
+entrada (P6). Espera-se o maior ganho no PointNet (sem contexto local) e ganho menor no PointNet++ e
+no DGCNN, que já usam vizinhança. \revisar{Verificar na Figura~\ref{fig:heatmap}, coluna Q9.}
+
+\paragraph{Q10 (temporal)} Com frames a cada 200 s, a média móvel é inócua nos regimes estáticos
+após o transiente (Maze, Spots) e reduz oscilações espúrias entre frames. Nos regimes móveis
+(Gliders, Spirals), as estruturas se deslocam vários pixels entre frames, e a média borra a máscara
+na direção do movimento. O efeito esperado é positivo nos estáticos e negativo nos móveis, e as
+métricas temporais (Tabela~\ref{tab:temporais}) mostram esse contraste melhor que o Dice agregado.
+
+\subsection{Interação pré $\times$ pós}
+Os efeitos não são aditivos. Um pré que suaviza (P6) e um pós que suaviza (Q4, Q10) se somam na
+direção de arredondar e unir estruturas, e o erro de fronteira se acumula. Já o CRF (Q9), por usar
+$A$ \emph{bruto}, compensa parcialmente o borramento de P6. A Figura~\ref{fig:heatmap} permite
+ler essas interações: uma combinação é sinérgica quando a célula supera a soma dos efeitos da sua
+linha e da sua coluna.
+
+\subsection{Evidências observadas}
+\revisar{Os números abaixo são do \textbf{piloto} (4 épocas, 4 trajetórias de treino por regime,
+pré P0, P1, P6 e P9, 3 trajetórias de teste por regime com frames a cada 1000~s). Substituir pelos
+do experimento completo, mantendo a estrutura do argumento.}
+
+\paragraph{Arquiteturas} Na referência, o DGCNN obteve Dice $0{,}948\pm0{,}011$, contra
+$0{,}909\pm0{,}020$ do PointNet e $0{,}887\pm0{,}009$ do PointNet++. A vantagem do DGCNN aparece
+sobretudo em Precision ($0{,}93$ contra $0{,}87$ e $0{,}83$): com diferenças locais
+$\mathbf{x}_j-\mathbf{x}_i$, ele posiciona melhor as interfaces. O PointNet++ ficou abaixo do
+PointNet no piloto, com a menor Precision. A interpolação 3-NN da decodificação suaviza as bordas
+e produz FP na periferia das estruturas, e o modelo, mais profundo, é o mais prejudicado pelas
+4 épocas. Gliders e Spirals foram os regimes mais difíceis para as três redes (Dice de 0,84 a 0,94),
+como antecipava a análise de vazamento (Seção~\ref{sec:gt}).
+
+\paragraph{Pré} O gaussiano (P6) foi o pior pré nas três redes ($\Delta$Dice de $-0{,}045$ no
+PointNet, $-0{,}016$ no DGCNN e $-0{,}015$ no PointNet++). A perda foi maior no PointNet, que não
+tem vizinhança para compensar o deslocamento das fronteiras, como previsto. Perona-Malik (P9) não
+ajudou ($-0{,}015$, $-0{,}014$ e $-0{,}001$), o que confirma que, sem ruído, não há o que remover.
+O Z-score (P1) foi neutro no PointNet ($0{,}909$ nos dois casos). Ele melhorou o PointNet++
+($+0{,}011$) e o DGCNN ($+0{,}010$, no limite do IC). A invariância afim vale para a classe de
+funções, mas não para a otimização em poucas épocas: com $a$ centrado e de variância unitária, as
+primeiras atualizações ficam mais bem condicionadas. Resta verificar se o efeito persiste com
+20 épocas.
+
+\paragraph{Pós} Q1 deu ganho pequeno e consistente nas três redes ($+0{,}002$ a $+0{,}007$).
+Q5--Q7 ficaram idênticos à referência: as redes não produzem componentes espúrios pequenos, então
+não há o que remover. A abertura (Q2, Q4) piorou levemente o PointNet e o DGCNN, porque apagou
+pontas e manchas pequenas. O CRF (Q9) foi o pós mais dependente da arquitetura: $+0{,}030$ no
+PointNet++ (Precision de $0{,}835$ para $0{,}883$), por corrigir justamente as bordas suavizadas
+pela interpolação, e leve piora no PointNet ($-0{,}004$) e no DGCNN ($-0{,}007$). A hipótese de que
+o CRF ajudaria mais a rede sem vizinhança foi \emph{refutada}: o ganho depende do tipo de erro
+(FP de borda), e não da ausência de contexto. A interação prevista entre P6 e Q9 apareceu no
+PointNet: após o gaussiano, o CRF recupera parte da perda ($0{,}864\to0{,}878$), porque reintroduz
+as bordas do $A$ bruto. O watershed (Q8) aumentou a Precision em todas as redes (por exemplo,
+$0{,}868\to0{,}906$ no PointNet), com efeito pequeno no Dice.
+
+\paragraph{Q10 e regimes móveis} A filtragem temporal foi o pós mais prejudicial: Dice de
+$0{,}11$ a $0{,}13$ menor em todas as redes. A perda concentrou-se em Gliders (de $0{,}84$--$0{,}91$
+para $\approx0{,}45$) e Spirals (de $0{,}86$--$0{,}94$ para $0{,}62$--$0{,}64$), enquanto em Maze e
+Bubbles a variação ficou entre $0$ e $-0{,}015$. O erro de consistência temporal subiu de $0{,}008$ a $0{,}020$ para $0{,}10$ a
+$0{,}12$. No piloto, o passo entre frames é de 1000 s, o que exagera o efeito. Mesmo assim, o
+padrão confirma o mecanismo: a média temporal só é segura onde o padrão é estático.
+
+\paragraph{Formação do padrão} Na tabela visual de Gliders (Figura~\ref{fig:visual_gliders}), em
+$t=400$ s o GT é formado por \emph{anéis}: durante a formação, $B$ cai no centro das manchas.
+As três redes preveem discos cheios, porque o vale de $A$ é cheio. Isso mostra o limite físico da
+inferência de $B$ a partir de $A$ e indica por que o preenchimento de buracos (Q6) é perigoso
+nesse instante.
+
+\paragraph{Custo} Por frame, na CPU, a rede custa 322 ms (PointNet), 392 ms (PointNet++) e
+1642 ms (DGCNN). Os pós morfológicos e de componentes custam de 1 a 2 ms, o watershed 23 ms e o
+CRF 239 ms. O CRF quase dobra a latência do PointNet para um ganho que só aparece no PointNet++.
+
+\subsection{Limitações}
+\begin{itemize}
+  \item O GT é um critério físico (limiar de $B$). A tarefa mede a capacidade de inferir a
+    estrutura de $B$ a partir de $A$, e não de descobrir estruturas novas.
+  \item Uma semente e um subconjunto de trajetórias, por custo. O IC por bootstrap captura a
+    variação entre trajetórias, mas não a variação entre sementes.
+  \item O treino em blocos $64\times64$ limita o contexto global a um quarto do domínio. Isso é
+    suficiente para a escala das estruturas, mas não para a forma global de uma espiral.
+  \item O CRF usa uma janela $7\times7$, e não conexões totais. O Q10 opera com passo de 200 s,
+    grosso para regimes móveis.
+\end{itemize}

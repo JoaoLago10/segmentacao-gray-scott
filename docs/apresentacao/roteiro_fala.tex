@@ -25,15 +25,15 @@ no dataset Gray-Scott, do The Well.
 A pergunta que guia o trabalho é: onde estão as estruturas e como elas evoluem no tempo?
 Para responder, vamos segmentar os padrões de Turing do Gray-Scott, um sistema de
 reação-difusão com duas concentrações químicas, $A$ e $B$. O experimento cruza dez
-pré-processamentos, três redes (U-Net, SegFormer e Mask2Former) e dez pós-processamentos,
+pré-processamentos, três redes de nuvem de pontos (PointNet, PointNet++ e DGCNN, treinadas por 20 épocas) e dez pós-processamentos,
 o que dá trezentas combinações. O dataset tem seis regimes, definidos pelos parâmetros $f$ e $k$,
 e cada regime gera um padrão diferente: pontos, labirintos, espirais, entre outros.
 
 \slide{3}{Situação do projeto}
-Dividimos o trabalho em sete etapas. A auditoria do dataset está concluída. A definição do
-ground truth está pronta para decisão, mas depende de uma resposta do professor. As etapas
-de código, piloto e experimentos vêm na sequência. Como nossa máquina não tem GPU, os
-treinos serão feitos no Colab ou no Kaggle.
+Dividimos o trabalho em sete etapas. A auditoria está concluída, o ground truth foi definido
+e o código está pronto e testado: os dez pré, os dez pós, as três redes e as métricas. Já
+rodamos um piloto reduzido, que valida o pipeline de ponta a ponta. O experimento completo,
+com 33 treinos, roda em GPU no Colab ou no Kaggle, porque nossa máquina não tem GPU.
 
 \slide{4}{Auditoria: principais achados}
 Antes de treinar, verificamos os dados. A divisão oficial tem 160 trajetórias de treino,
@@ -64,15 +64,38 @@ cai para menos de 20\%. Por isso, propomos que o frame médio defina o critério
 máscara seja gerada em cada instante.
 
 \slide{8}{Decisões tomadas}
-Já tomamos algumas decisões. A rede vai receber só $A$, porque a máscara vem de $B$: se a
-rede visse $B$, ela apenas reaprenderia o limiar. Vamos excluir os frames sem padrão e o
-instante inicial. Na condição ``sem pré'' usamos os dados brutos, e na ``sem pós'',
-binarização com limiar fixo de 0,5.
+A rede recebe só $A$, porque a máscara vem de $B$: se a rede visse $B$, apenas reaprenderia o
+limiar. O ground truth é $B$ maior que 0,151, gerado em cada frame. Ou seja, o frame médio
+define o critério, e a máscara acompanha a evolução do padrão. Excluímos os frames sem padrão e
+o instante inicial. Mantivemos a resolução de 128 por 128, que já é a menor do The Well:
+reduzir mais apagaria estruturas que têm só 4 a 8 pixels de largura.
 
-\slide{9}{Perguntas e próximos passos}
-Para seguir, precisamos de algumas respostas do professor, principalmente sobre o que é o
-frame médio e se o ground truth deve ser um por regime. Com isso definido, implementamos o
-código, rodamos um piloto, depois os 33 treinamentos, e por fim as tabelas e o artigo.
-Obrigado.
+\slide{9}{Frame como nuvem de pontos}
+Seguindo a orientação do professor, usamos redes de nuvem de pontos. Cada pixel vira um ponto
+com coordenadas $x$, $y$ e o valor de $A$. A PointNet olha cada ponto isoladamente, mais um
+resumo global. A PointNet++ agrupa vizinhanças em várias escalas. O DGCNN liga cada ponto aos
+vizinhos num grafo que é recalculado a cada camada.
+
+\slide{10}{Quatro condições e protocolo}
+Avaliamos quatro condições: sem pré e sem pós, somente pré, somente pós e as duas juntas. Os
+parâmetros de pré são ajustados no treino e os de pós na validação. O teste é usado uma única
+vez. Nossa hipótese é que normalizações não mudam nada, porque a normalização em lote das redes
+absorve qualquer mudança de escala. Também esperamos que os filtros não ajudem, porque os dados
+de simulação não têm ruído: o que o filtro remove é sinal.
+
+\slide{11}{Piloto: mapa pré por pós}
+Este mapa mostra todas as combinações de uma vez. A célula do canto é a referência, a primeira
+linha é só pós, a primeira coluna é só pré, e o resto é pré com pós. Por enquanto é o piloto,
+feito com poucos dados, só para validar o pipeline.
+
+\slide{12}{Tabela visual}
+Aqui está a tabela visual pedida: o instante inicial, dois intermediários e o final, com a
+entrada, o pré, o gabarito e as máscaras das três redes nas quatro condições. Em vermelho
+estão os falsos positivos, em azul os falsos negativos.
+
+\slide{13}{Próximos passos}
+Falta rodar o experimento completo em GPU e completar a discussão com os números finais. As
+tabelas já estão no formato padronizado, para juntar com os outros fluidos no artigo de
+benchmark. Obrigado.
 
 \end{document}

@@ -1,0 +1,84 @@
+% Artigo P2 de PDI --- template Elsevier (elsarticle), formato Results in Engineering.
+% Compilar no Overleaf (pdfLaTeX + BibTeX) ou localmente: latexmk -pdf main.tex
+\documentclass[preprint,12pt,a4paper]{elsarticle}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs,longtable,multirow,array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={,}}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric,fit,backgrounds}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+\usepackage{ifthen}
+
+% ---------------------------------------------------------------------------
+% Origem dos resultados: "piloto" (CPU, reduzido) ou "exp" (experimento completo em GPU).
+% Depois de rodar o experimento completo, trocar para {exp} e recompilar.
+\newcommand{\resdir}{piloto}
+\graphicspath{{figs/}}
+\newcommand{\figres}[1]{figs/\resdir/#1}
+\newcommand{\tabres}[1]{\input{tabelas/\resdir/#1}}
+% Marcação de texto a revisar com os números do experimento completo.
+\newcommand{\revisar}[1]{\textcolor{orange!70!black}{#1}}
+% ---------------------------------------------------------------------------
+
+\journal{Results in Engineering}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Segmentação de padrões de Turing do sistema de Gray-Scott como nuvens de pontos:
+efeito de dez pré-processamentos e dez pós-processamentos em PointNet, PointNet++ e DGCNN}
+
+\author[ufma]{Equipe Gray-Scott}
+\affiliation[ufma]{organization={Universidade Federal do Maranhão (UFMA)},
+            city={São Luís}, state={MA}, country={Brasil}}
+
+\begin{abstract}
+Investigamos onde estão as estruturas de interesse em um sistema de reação-difusão e como elas
+evoluem no tempo, segmentando os padrões de Turing do conjunto \texttt{gray\_scott\_reaction\_diffusion}
+do The Well (seis regimes $(f,k)$, campos $A$ e $B$ em $128\times128$ com contorno periódico). Cada
+frame é representado como uma nuvem de pontos $\{(x_i,y_i,a_i)\}$, em que $a_i$ é o campo $A$
+pré-processado, e o rótulo de cada ponto vem de um critério físico sobre $B$ ($B>\tau$, com $\tau$
+de Otsu ajustado no treino). Três arquiteturas de nuvem de pontos (PointNet, PointNet++ e DGCNN),
+treinadas por 20 épocas, são avaliadas em quatro condições: sem pré e sem pós, somente pré
+(P1--P10), somente pós (Q1--Q10) e pré e pós (300 combinações). Reportamos IoU, Dice, Precision,
+Recall com IC de 95\% por bootstrap sobre trajetórias, métricas temporais e custo computacional,
+por regime e no agregado, num formato de tabela padronizado para benchmark entre fluidos.
+\end{abstract}
+
+\begin{keyword}
+Gray-Scott \sep reação-difusão \sep padrões de Turing \sep segmentação \sep nuvem de pontos \sep
+PointNet \sep DGCNN \sep pré-processamento \sep pós-processamento \sep The Well
+\end{keyword}
+
+\end{frontmatter}
+
+\input{secoes/01_introducao}
+\input{secoes/02_aplicacoes}
+\input{secoes/03_fundamentacao}
+\input{secoes/04_metodologia}
+\input{secoes/05_resultados}
+\input{secoes/06_discussao}
+\input{secoes/07_conclusao}
+
+\section*{Disponibilidade de código e dados}
+Código, configurações e resultados: repositório do projeto (\texttt{configs/experimento.yaml},
+\texttt{scripts/04}--\texttt{08}). Os dados são lidos diretamente do repositório público do The Well
+no Hugging Face (\texttt{polymathic-ai/gray\_scott\_reaction\_diffusion}).
+
+\bibliographystyle{elsarticle-num}
+\bibliography{referencias}
+
+\appendix
+\section{Resultados completos da condição pré e pós}
+\tabres{t_condicao_4}
+
+\end{document}

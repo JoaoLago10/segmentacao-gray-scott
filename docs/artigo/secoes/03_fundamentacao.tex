@@ -1,0 +1,261 @@
+\section{Fundamentação teórica}
+\label{sec:teoria}
+
+\subsection{O modelo de Gray-Scott}
+\label{sec:grayscott}
+
+O modelo descreve duas espécies químicas com concentrações $A(\mathbf{x},t)$ (substrato) e
+$B(\mathbf{x},t)$ (autocatalisador) num domínio $\Omega=[-1,1]^2$ com contorno periódico
+\cite{grayscott1984,pearson1993}:
+\begin{align}
+  \frac{\partial A}{\partial t} &= \delta_A \nabla^2 A - A B^2 + f\,(1 - A), \label{eq:gsA}\\
+  \frac{\partial B}{\partial t} &= \delta_B \nabla^2 B + A B^2 - (f + k)\,B. \label{eq:gsB}
+\end{align}
+O termo $AB^2$ é a reação autocatalítica $A + 2B \to 3B$: consome $A$ e produz $B$. O termo
+$f(1-A)$ é a \emph{alimentação} (\emph{feed}), que repõe $A$ em direção ao reservatório $A=1$ à
+taxa $f$. O termo $-(f+k)B$ é a \emph{remoção}: $B$ sai do sistema por arraste ($f$) e decai para
+um produto inerte $C$ ($k$, \emph{kill}). No The Well, $\delta_A = 2\cdot10^{-5}$ e
+$\delta_B = 10^{-5}$ em todas as simulações \cite{ohana2024well}.
+A documentação oficial do conjunto escreve $-AB^2$ na Eq.~\eqref{eq:gsB}; o sinal correto,
+usado pelo gerador dos dados, é $+AB^2$.
+
+\paragraph{Estados homogêneos} Igualando os termos de reação a zero, o estado trivial
+$(A,B)=(1,0)$ existe para todo $(f,k)$. Para $B\neq0$, a Eq.~\eqref{eq:gsB} dá $AB = f+k$, e a
+substituição na Eq.~\eqref{eq:gsA} leva a
+\begin{equation}
+  (f+k)\,B^2 - f\,B + f\,(f+k) = 0 \;\Rightarrow\;
+  B_\pm = \frac{f \pm \sqrt{f^2 - 4 f (f+k)^2}}{2(f+k)}, \qquad A_\pm = \frac{f+k}{B_\pm},
+\end{equation}
+que existem quando $f \geq 4(f+k)^2$. O Jacobiano no estado trivial é
+$\mathrm{diag}(-f, -(f+k))$, com autovalores negativos: o fundo $(1,0)$ é \emph{linearmente
+estável}. Os padrões não surgem de uma instabilidade do fundo, mas de perturbações finitas, que
+são as condições iniciais (séries de Fourier e aglomerados gaussianos) do The Well. Isso explica
+por que algumas trajetórias decaem para o fundo homogêneo (as trajetórias estacionárias de Gliders
+e Spirals).
+
+\paragraph{Instabilidade de Turing} Seja $\mathbf{J}$ o Jacobiano num estado homogêneo não
+trivial e $\mathbf{D}=\mathrm{diag}(\delta_A,\delta_B)$. Uma perturbação
+$\propto e^{\lambda t + i\mathbf{q}\cdot\mathbf{x}}$ cresce se algum autovalor de
+$\mathbf{J}-q^2\mathbf{D}$ tiver parte real positiva. Com
+$J_{11} = -B^2 - f$, $J_{12} = -2AB$, $J_{21} = B^2$ e $J_{22} = 2AB - (f+k)$, a instabilidade
+induzida por difusão ocorre quando o estado é estável sem difusão
+($\mathrm{tr}\,\mathbf{J}<0$, $\det\mathbf{J}>0$) e
+\begin{equation}
+  h(q^2) = \delta_A\delta_B\, q^4 - (\delta_A J_{22} + \delta_B J_{11})\, q^2 + \det\mathbf{J} < 0
+  \quad\text{para algum } q,
+\end{equation}
+isto é, $\delta_A J_{22} + \delta_B J_{11} > 2\sqrt{\delta_A\delta_B\det\mathbf{J}}$
+\cite{turing1952,murray2003,cross2009}. O número de onda crítico
+$q_c^2 = (\delta_A J_{22} + \delta_B J_{11})/(2\delta_A\delta_B)$ fixa o comprimento de onda
+característico $2\pi/q_c$ do padrão. Ele depende de $(f,k)$ e de $\sqrt{\delta}$ e, nesta
+discretização, corresponde a estruturas de 4 a 8 pixels de largura. Esse é o motivo pelo qual a
+resolução não pode ser reduzida sem destruir o padrão (Seção~\ref{sec:resolucao}).
+
+\paragraph{Os seis regimes} Pearson \cite{pearson1993} classificou o plano $(f,k)$ por
+morfologia. O The Well usa seis pontos (Tabela~\ref{tab:regimes_fk}): \emph{Gliders}
+(estruturas móveis que se propagam e se aniquilam), \emph{Bubbles} (bolhas de fundo dentro de uma
+fase de $B$), \emph{Maze} (labirinto de listras quase todo conexo), \emph{Worms} (vermes
+alongados), \emph{Spirals} (ondas espirais em movimento permanente) e \emph{Spots} (manchas que se
+replicam por divisão até preencher o domínio).
+
+\begin{table}[t]\centering\small
+\caption{Regimes do conjunto e características medidas na auditoria (Etapa 1): fração de pixels de
+padrão ($B>\tau$, validação) e instante aproximado de fim do transiente.}
+\label{tab:regimes_fk}
+\begin{tabular}{lcccl}
+\toprule
+Regime & $f$ & $k$ & Pixels de padrão & Dinâmica após o transiente \\
+\midrule
+Gliders & 0,014 & 0,054 & 5\%  & móvel; 44\% das trajetórias decaem ao fundo \\
+Bubbles & 0,098 & 0,057 & 28\% & evolução lenta \\
+Maze    & 0,029 & 0,057 & 52\% & quase estático após $\sim$1500 s \\
+Worms   & 0,058 & 0,065 & 25\% & evolução lenta \\
+Spirals & 0,018 & 0,051 & 27\% & móvel permanente \\
+Spots   & 0,030 & 0,062 & 26\% & quase estático após $\sim$3500 s \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Simulação} Os dados foram gerados por um método espectral de Fourier com integração
+temporal exponencial de quarta ordem (ETDRK4 \cite{kassam2005}), via Chebfun \cite{chebfun2014},
+com passo de 1 s e campos salvos a cada 10 s, de $t=0$ a $t=10\,000$ s. Por isso os dados são
+\emph{praticamente livres de ruído}. Esse fato é central na interpretação dos filtros P6--P10
+(Seção~\ref{sec:discussao}).
+
+\subsection{O frame como nuvem de pontos}
+\label{sec:nuvem}
+
+Um frame é a função discreta $a:\mathcal{G}\to\mathbb{R}$ sobre a grade
+$\mathcal{G}=\{(x_i,y_i)\}_{i=1}^{N}$. Na representação por nuvem de pontos ele é o conjunto
+\begin{equation}
+  \mathcal{S} = \{\,\mathbf{p}_i = (x_i, y_i, a_i)\,\}_{i=1}^{N}, \qquad a_i = \mathcal{P}(A)(x_i,y_i),
+\end{equation}
+em que $\mathcal{P}$ é o pré-processamento. A tarefa é aprender $g_\theta:\mathcal{S}\mapsto
+\{\hat{y}_i\}$ com $\hat{y}_i\in[0,1]$, \emph{equivariante a permutações}: reordenar os pontos
+reordena as saídas da mesma forma. Geometricamente, $\mathcal{S}$ é uma superfície de altura
+$z=a(x,y)$ amostrada em $\mathbb{R}^3$. As estruturas do Gray-Scott são vales de $A$ (onde $B$ é
+alto), e segmentar é separar os pontos dos vales dos pontos do platô $a\approx1$.
+
+\subsection{PointNet}
+PointNet \cite{qi2017pointnet} aproxima funções de conjunto pela composição
+\begin{equation}
+  F(\mathcal{S}) \approx \gamma\Big(\max_{i=1..N} h(\mathbf{p}_i)\Big),
+\end{equation}
+em que $h$ é um MLP compartilhado por ponto, $\max$ é o \emph{max-pooling} por canal (função
+simétrica) e $\gamma$ é um MLP. O teorema de aproximação universal do artigo mostra que qualquer
+função contínua de conjuntos (na métrica de Hausdorff) é aproximada por essa forma, com o mesmo
+princípio dos \emph{Deep Sets} \cite{zaheer2017deepsets}. Na segmentação, o descritor global
+$\mathbf{g}=\max_i h(\mathbf{p}_i)$ é concatenado à característica local de cada ponto, e um MLP
+prediz $\hat{y}_i = \sigma(\phi([h_1(\mathbf{p}_i);\mathbf{g}]))$. Cada ponto é classificado só a
+partir de si mesmo e de um resumo global. \textbf{Não há vizinhança local}: a rede não ``vê''
+gradientes nem formas, apenas o valor $a_i$, a posição e o contexto global. Usamos a versão sem
+T-Nets, porque a nuvem é 2D com orientação canônica e as rotações de $90^\circ$ entram como aumento
+de dados.
+
+\subsection{PointNet++}
+PointNet++ \cite{qi2017pointnet2} aplica PointNet de forma hierárquica em vizinhanças
+(\emph{set abstraction}, SA). Em cada nível $\ell$:
+\begin{enumerate}
+  \item \emph{amostragem}: $M_\ell$ centroides por amostragem do ponto mais distante (FPS), que
+    cobre o conjunto de forma aproximadamente uniforme;
+  \item \emph{agrupamento}: os $k$ vizinhos mais próximos $\mathcal{N}(c)$ de cada centroide $c$;
+  \item \emph{PointNet local}: $\mathbf{f}_c = \max_{j\in\mathcal{N}(c)} h_\ell\big([\mathbf{x}_j-\mathbf{x}_c;\ \mathbf{f}_j]\big)$.
+\end{enumerate}
+As coordenadas relativas $\mathbf{x}_j-\mathbf{x}_c$ tornam as características invariantes a
+translações. Usamos três níveis ($4096\to1024\to256\to64$ pontos, $k=16$). Na decodificação
+(\emph{feature propagation}), as características de um nível esparso são interpoladas para o nível
+denso por inverso da distância com os 3 vizinhos,
+\begin{equation}
+  \mathbf{f}(\mathbf{x}) = \frac{\sum_{j=1}^{3} w_j \mathbf{f}_j}{\sum_{j=1}^{3} w_j},\qquad
+  w_j = \frac{1}{\|\mathbf{x} - \mathbf{x}_j\|},
+\end{equation}
+e concatenadas às do mesmo nível do codificador (\emph{skip connections}), de modo análogo à U-Net.
+O campo receptivo cresce com a profundidade e permite reconhecer formas (manchas, listras) e não
+apenas valores.
+
+\subsection{DGCNN}
+O DGCNN \cite{wang2019dgcnn} define a convolução de arestas (EdgeConv) sobre um grafo $k$-NN,
+\begin{equation}
+  \mathbf{x}_i' = \max_{j:(i,j)\in\mathcal{E}} h_\Theta\big(\mathbf{x}_i,\ \mathbf{x}_j - \mathbf{x}_i\big),
+\end{equation}
+que combina a característica do ponto (informação global) com as diferenças em relação aos vizinhos
+(informação local, análoga a um gradiente discreto). O grafo é \emph{dinâmico}: na primeira camada
+os vizinhos são definidos pelas coordenadas $(x,y)$ (grafo espacial). Nas camadas seguintes, são
+recalculados no espaço de características, de modo que pontos distantes mas semelhantes (por
+exemplo, duas manchas do mesmo regime) passam a trocar informação. Três EdgeConv
+($k=16$), uma projeção global de 1024 canais e um MLP por ponto formam a cabeça de segmentação.
+
+\subsection{Pré-processamentos}
+\label{sec:pre}
+Os pré-processamentos se dividem em transformações numéricas pontuais (P1--P5, que mudam só os
+valores de $a_i$) e filtros espaciais (P6--P10, que mudam a forma do campo)
+\cite{gonzalez2018}. Estatísticas ($\mu,\sigma$, quantis $Q_p$) são calculadas \textbf{só no
+treino} e aplicadas sem recalibração à validação e ao teste. Todos os filtros usam extensão
+periódica.
+\begin{description}
+  \item[P1 Z-score:] $a = (A-\mu)/\sigma$.
+  \item[P2 Min-Max:] $a = (A-\min A)/(\max A-\min A)$.
+  \item[P3 Robusta:] $a = (A - Q_{50})/(Q_{75}-Q_{25})$.
+  \item[P4 Recorte por percentis:] $a = \min(\max(A, Q_{1}), Q_{99})$, sem reescala, para isolar o
+    efeito do recorte.
+  \item[P5 Logarítmica:] $a = \log(\max(A,0)+\varepsilon)$, $\varepsilon = 10^{-3}$, que expande os
+    valores baixos de $A$ (o interior das estruturas).
+  \item[P6 Gaussiano:] $a = G_\sigma * A$, $\sigma = 1$ px.
+  \item[P7 Mediana:] $a(\mathbf{x}) = \mathrm{med}\{A(\mathbf{y}) : \mathbf{y}\in W_{3\times3}(\mathbf{x})\}$.
+  \item[P8 Bilateral] \cite{tomasi1998}: $a(\mathbf{x}) = \frac{1}{Z}\sum_{\mathbf{y}} e^{-\|\mathbf{x}-\mathbf{y}\|^2/2\sigma_s^2}\, e^{-(A(\mathbf{x})-A(\mathbf{y}))^2/2\sigma_r^2}A(\mathbf{y})$,
+    com $\sigma_s=1$ px, $\sigma_r=0{,}05$ e janela $5\times5$.
+  \item[P9 Difusão anisotrópica] \cite{perona1990}: $\partial_\tau a = \nabla\cdot\big(g(\|\nabla a\|)\nabla a\big)$,
+    $g(s) = e^{-(s/\kappa)^2}$, $\kappa=0{,}05$, 10 iterações explícitas com $\Delta\tau=0{,}2$.
+  \item[P10 Wavelets] \cite{donoho1994,chang2000}: decomposição Daubechies-2 em 2 níveis com
+    extensão periódica e limiarização suave BayesShrink,
+    $\tau_s = \hat\sigma^2/\hat\sigma_{X,s}$, com $\hat\sigma = \mathrm{med}(|d_{HH_1}|)/0{,}6745$.
+\end{description}
+
+\subsection{Pós-processamentos}
+\label{sec:pos}
+A rede produz a probabilidade $P(\mathbf{x})$ do ponto pertencer ao padrão. Sem pós, a máscara é
+$\hat{M} = \mathbb{1}[P>0{,}5]$ (Q0). Os parâmetros de cada método são escolhidos na validação
+(Tabela~\ref{tab:grades}). A morfologia \cite{serra1982,soille2003} e a rotulação de componentes
+são periódicas: um componente que toca uma borda continua na borda oposta.
+\begin{description}
+  \item[Q1 Limiarização:] $\hat{M} = \mathbb{1}[P > \tau^*]$, com $\tau^*$ que maximiza o Dice de
+    validação.
+  \item[Q2 Abertura:] $\hat{M}\circ S = (\hat{M}\ominus S)\oplus S$, que remove saliências e objetos
+    menores que o elemento estruturante $S$.
+  \item[Q3 Fechamento:] $\hat{M}\bullet S = (\hat{M}\oplus S)\ominus S$, que fecha lacunas.
+  \item[Q4 Abertura + fechamento:] $(\hat{M}\circ S)\bullet S$.
+  \item[Q5 Remoção de componentes pequenos:] remove os componentes $C$ com $|C| < a_{\min}$.
+  \item[Q6 Preenchimento de buracos:] no toro não há ``exterior'', então um buraco é definido como um
+    componente do fundo com área $\leq a_{\max}$, que é incorporado ao padrão.
+  \item[Q7 Seleção de componentes:] mantém os componentes com probabilidade média
+    $\bar{P}_C \geq p_{\min}$. O critério ``maior componente'' não se aplica, porque Spots tem
+    $\sim$200 componentes por frame.
+  \item[Q8 Watershed] \cite{vincent1991}: inundação de $\|\nabla P\|$ (Sobel) a partir de marcadores
+    de padrão ($P>p_{\text{alto}}$) e de fundo ($P<p_{\text{baixo}}$). A fronteira é posta na
+    crista do gradiente, e não no nível 0,5.
+  \item[Q9 CRF] \cite{lafferty2001,krahenbuhl2011}: minimiza
+    $E(\mathbf{y}) = \sum_i -\log P(y_i) + \sum_{i<j}\mu(y_i,y_j)\,k(\mathbf{f}_i,\mathbf{f}_j)$
+    com o modelo de Potts $\mu$ e o kernel
+    $k = w_a e^{-\frac{\|\mathbf{x}_i-\mathbf{x}_j\|^2}{2\theta_\alpha^2}-\frac{(A_i-A_j)^2}{2\theta_\beta^2}} + w_s e^{-\frac{\|\mathbf{x}_i-\mathbf{x}_j\|^2}{2\theta_\gamma^2}}$,
+    por 5 iterações de campo médio numa janela periódica $7\times7$.
+  \item[Q10 Filtragem temporal:] $\tilde{P}_t = \frac{1}{w}\sum_{s=-\lfloor w/2\rfloor}^{\lfloor w/2\rfloor} P_{t+s}$,
+    seguida de $\mathbb{1}[\tilde{P}_t>0{,}5]$, ao longo dos frames de cada trajetória (passo de 200 s).
+\end{description}
+
+\begin{table}[t]\centering\small
+\caption{Grades de parâmetros dos pós-processamentos (escolha pelo Dice médio de validação).}
+\label{tab:grades}
+\begin{tabular}{ll}
+\toprule
+Método & Grade \\
+\midrule
+Q1 & $\tau\in\{0{,}05, 0{,}10, \dots, 0{,}95\}$ \\
+Q2, Q3, Q4 & $S\in\{\text{cruz } 3\times3,\ \text{quadrado } 3\times3\}$ \\
+Q5 & $a_{\min}\in\{2,4,8,16,32\}$ px \\
+Q6 & $a_{\max}\in\{2,4,8,16,32\}$ px \\
+Q7 & $p_{\min}\in\{0{,}6; 0{,}7; 0{,}8; 0{,}9\}$ \\
+Q8 & $p_{\text{alto}}\in\{0{,}7; 0{,}8; 0{,}9\}$, $p_{\text{baixo}}\in\{0{,}1; 0{,}2; 0{,}3\}$ \\
+Q9 & $w_a\in\{1,3\}$, $\theta_\beta\in\{0{,}05; 0{,}1\}$, $w_s=1$, $\theta_\alpha=3$, $\theta_\gamma=1$ \\
+Q10 & $w\in\{3,5\}$ frames \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Métricas}
+\label{sec:metricas}
+Com $\mathrm{TP}$, $\mathrm{FP}$ e $\mathrm{FN}$ contados por pixel (ponto):
+\begin{gather}
+  \mathrm{IoU} = \frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}+\mathrm{FN}} \;\text{\cite{jaccard1912}},\qquad
+  \mathrm{Dice} = \frac{2\,\mathrm{TP}}{2\,\mathrm{TP}+\mathrm{FP}+\mathrm{FN}} \;\text{\cite{dice1945}},\\
+  \mathrm{Precision} = \frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}},\qquad
+  \mathrm{Recall} = \frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}}.
+\end{gather}
+Dice e IoU são monotonamente relacionados, $\mathrm{Dice} = 2\,\mathrm{IoU}/(1+\mathrm{IoU})$, e
+portanto ordenam os métodos da mesma forma numa única máscara. O Dice é a média harmônica de
+Precision e Recall. A Precision penaliza falso padrão (por exemplo, estruturas ``inventadas'' pela
+rede) e a Recall penaliza estruturas perdidas (por exemplo, Gliders pequenos apagados por uma
+abertura). Seguindo a convenção G4, TP, FP e FN são somados nos frames de cada trajetória, e a
+métrica é calculada por trajetória (vazio contra vazio vale 1).
+
+\paragraph{Métricas temporais} Para uma trajetória com máscaras $\hat{M}_t$ e GT $M_t$ em frames
+consecutivos:
+\begin{itemize}
+  \item erro de variação de área:
+    $E_{\text{área}} = \overline{|\Delta|\hat{M}_t|/|\Omega| - \Delta|M_t|/|\Omega||}$;
+  \item erro de centroide:
+    $E_{\text{centr.}} = \overline{d_{\mathbb{T}}(\hat{\mathbf{c}}_t, \mathbf{c}_t)}$, com o
+    centroide circular \cite{bai2008} (média angular em cada eixo, adequada ao toro) e a distância
+    periódica $d_{\mathbb{T}}$;
+  \item erro de consistência:
+    $E_{\text{cons.}} = \overline{|\mathrm{IoU}(\hat{M}_t,\hat{M}_{t+1}) - \mathrm{IoU}(M_t,M_{t+1})|}$.
+\end{itemize}
+Comparar com o GT, e não exigir apenas que a máscara mude pouco, evita premiar uma máscara
+``congelada'' em regimes móveis (Spirals e Gliders), em que a mudança entre frames é física.
+
+\paragraph{Incerteza} A unidade estatística é a trajetória, porque frames da mesma trajetória são
+correlacionados. Reportamos a média sobre trajetórias e a semi-amplitude do intervalo de confiança
+de 95\% por bootstrap percentil com 2000 reamostragens \cite{efron1993}.
+
+\paragraph{Custo} A latência é o tempo médio por frame $128\times128$ (pré, mais rede com todos os
+blocos do frame num lote, mais pós), em ms. A memória é o pico de memória de GPU alocada na
+inferência, em MB.

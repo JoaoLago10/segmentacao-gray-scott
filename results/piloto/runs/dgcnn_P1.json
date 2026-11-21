@@ -1,0 +1,59 @@
+{
+ "arch": "dgcnn",
+ "arquitetura": "DGCNN",
+ "pre": {
+  "id": "P1",
+  "nome": "Normalização Z-score",
+  "params": {
+   "media": 0.7966387867927551,
+   "desvio": 0.263476699590683
+  }
+ },
+ "epocas": 4,
+ "batch": 8,
+ "lr": 0.001,
+ "seed": 0,
+ "tau_gt": 0.15074408054351807,
+ "bloco": 64,
+ "passo_inferencia": 64,
+ "n_parametros": 635265,
+ "n_frames_treino": 192,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 0.9746418297290802,
+   "perda_valid": 0.887720278898875,
+   "tempo_s": 206.4440495967865
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 0.43204296256105107,
+   "perda_valid": 1.4344112634658814,
+   "tempo_s": 410.96729350090027
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 0.2997634584705035,
+   "perda_valid": 0.22043910423914592,
+   "tempo_s": 622.6031169891357
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 0.25346975959837437,
+   "perda_valid": 0.19479293624560037,
+   "tempo_s": 908.5404498577118
+  }
+ ],
+ "tempo_treino_s": 908.5405502319336,
+ "latencia_rede_ms_frame": 1629.1323895454545,
+ "latencia_pre_ms_frame": 0.030821810166041057,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}

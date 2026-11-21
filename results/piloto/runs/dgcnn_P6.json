@@ -1,0 +1,59 @@
+{
+ "arch": "dgcnn",
+ "arquitetura": "DGCNN",
+ "pre": {
+  "id": "P6",
+  "nome": "Filtro gaussiano",
+  "params": {
+   "sigma_px": 1.0,
+   "modo": "wrap"
+  }
+ },
+ "epocas": 4,
+ "batch": 8,
+ "lr": 0.001,
+ "seed": 0,
+ "tau_gt": 0.15074408054351807,
+ "bloco": 64,
+ "passo_inferencia": 64,
+ "n_parametros": 635265,
+ "n_frames_treino": 192,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 1.020558203260104,
+   "perda_valid": 1.180392567316691,
+   "tempo_s": 220.00121116638184
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 0.46591440712412197,
+   "perda_valid": 1.9100537021954855,
+   "tempo_s": 442.31975293159485
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 0.3462117463350296,
+   "perda_valid": 0.40958717962106067,
+   "tempo_s": 650.5219757556915
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 0.28647073172032833,
+   "perda_valid": 0.24440213640530903,
+   "tempo_s": 944.6096470355988
+  }
+ ],
+ "tempo_treino_s": 944.6097137928009,
+ "latencia_rede_ms_frame": 1702.5951889545468,
+ "latencia_pre_ms_frame": 0.15864397088686624,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}
