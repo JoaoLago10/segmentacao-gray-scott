@@ -1,4 +1,4 @@
-"""Aplica Q0--Q10 às probabilidades salvas e calcula as métricas das quatro condições.
+"""Aplica Q0--Q5 (PROTOCOLO.MD, Seção 8) às probabilidades salvas e calcula as métricas das quatro condições.
 
 Para cada modelo (arquitetura x pré):
 1. Escolhe os parâmetros de cada Qi na validação (máximo do Dice médio por trajetória).
@@ -7,7 +7,8 @@ Para cada modelo (arquitetura x pré):
 
 Saídas em results/{exp,piloto}/:
     metricas_por_trajetoria.csv   uma linha por (arquitetura, pré, pós, trajetória de teste)
-    metricas_padrao.csv           tabela padronizada da turma (Seção 0.9.7), média e IC 95%
+    resultados_protocolo.csv      esquema da Seção 12 do protocolo (uma linha por configuração)
+    metricas_padrao.csv           tabela padronizada (condição, pré, arquitetura, pós), média e IC 95%
     metricas_por_regime.csv       idem, por regime
     metricas_temporais.csv        métricas temporais agregadas
     parametros_pos.json           parâmetros escolhidos na validação e Dice de validação
@@ -29,14 +30,14 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src import postprocessing  # noqa: E402
-from src.data.experiment import ROOT, load_config, load_split  # noqa: E402
+from src.data.experiment import ROOT, load_config, load_split, split_path  # noqa: E402
 from src.evaluation.metrics import bootstrap_ci, confusion, scores, temporal  # noqa: E402
 from src.ground_truth.generation import gt_mask, valid_frames  # noqa: E402
 from src.models import ARCH_NAMES  # noqa: E402
 from src.preprocessing.methods import PRE_IDS  # noqa: E402
 
 FLUIDO = "gray_scott_reaction_diffusion"
-METRICS = ["IoU", "Dice", "Precision", "Recall"]
+METRICS = ["IoU", "Dice", "Precision", "Recall", "IoU_fundo", "mIoU"]
 TEMPORAIS = ["ErroArea", "ErroCentroide", "ErroConsist"]
 
 
@@ -99,6 +100,8 @@ def evaluate_model(job):
                 continue
             c, pred, dt = eval_traj(qid, best, probs["test"][i][ok], g["A"][i][ok], g["M"][i][ok])
             s = scores(c)
+            iou_bg = c[3] / max(c[3] + c[1] + c[2], 1)       # classe fundo: TN / (TN + FP + FN)
+            s["IoU_fundo"], s["mIoU"] = iou_bg, (s["IoU"] + iou_bg) / 2
             rows.append({"arch": arch, "Pre": pre, "Pos": qid, "Regime": str(g["regime"][i]),
                          "Traj": int(g["traj"][i]), "n_frames": int(ok.sum()),
                          "TP": int(c[0]), "FP": int(c[1]), "FN": int(c[2]), "TN": int(c[3]),
@@ -130,6 +133,34 @@ def aggregate(df: pd.DataFrame, runs: dict, by: list[str]) -> pd.DataFrame:
         row["n_trajetorias"] = len(g)
         out.append(row)
     return pd.DataFrame(out)
+
+
+def protocol_csv(geral: pd.DataFrame, runs: dict, params: dict, cfg: dict) -> pd.DataFrame:
+    """Esquema de colunas da Seção 12 do PROTOCOLO.MD."""
+    budget = sum(split_path(cfg, s).stat().st_size for s in ("train", "valid", "test")) / 1e9
+    inv = {v: k for k, v in ARCH_NAMES.items()}
+    rows = []
+    for _, r in geral.iterrows():
+        pre = "P0" if r["Pre"] == "nenhum" else r["Pre"]
+        pos = "Q0" if r["Pos"] == "nenhum" else r["Pos"]
+        run = runs[f"{inv[r['Arquitetura']]}_{pre}"]
+        rows.append({
+            "dataset": FLUIDO, "dataset_variant": cfg["dataset_variant"],
+            "trajectory_split": "oficial (train/valid/test por trajetória)",
+            "resolution_original": "x".join(map(str, cfg["resolucao_original"])),
+            "resolution_used": "x".join(map(str, cfg["resolucao_usada"])),
+            "sample_budget_gb": round(budget, 2), "preprocessing_id": pre,
+            "preprocessing_params": json.dumps(run["pre"]["params"], ensure_ascii=False),
+            "architecture": r["Arquitetura"], "epochs": run["epocas"], "best_epoch": run["melhor_epoca"],
+            "seed": run["seed"], "postprocessing_id": pos,
+            "postprocessing_params": json.dumps(params[f"{inv[r['Arquitetura']]}_{pre}"][pos]["params"]),
+            "IoU": r["IoU"], "IoU_IC95": r["IoU_IC95"], "Dice": r["Dice"], "Dice_IC95": r["Dice_IC95"],
+            "Precision": r["Precision"], "Recall": r["Recall"], "latency_ms": r["Latencia_ms"],
+            "peak_memory": r["Memoria_MB"],
+            "notes": f"{r['Condicao']}; GT B>tau por frame; entrada só A; "
+                     f"{'pré-treinada' if run.get('pretreinado') else 'do zero'}; n_traj_teste={r['n_trajetorias']}",
+        })
+    return pd.DataFrame(rows)
 
 
 def order(df: pd.DataFrame) -> pd.DataFrame:
@@ -178,9 +209,11 @@ def main():
     geral.to_csv(out_dir / "metricas_completas.csv", index=False, float_format="%.4f")
     order(aggregate(df, runs, ["Regime"])).to_csv(out_dir / "metricas_por_regime.csv", index=False,
                                                   float_format="%.4f")
+    protocol_csv(geral, runs, params, cfg).to_csv(out_dir / "resultados_protocolo.csv", index=False,
+                                                  float_format="%.4f")
     geral[["Condicao", "Pre", "Arquitetura", "Pos"] + TEMPORAIS].to_csv(
         out_dir / "metricas_temporais.csv", index=False, float_format="%.4f")
-    print(geral[geral["Condicao"] != "Pré e pós"][std_cols[1:11]].to_string(index=False))
+    print(geral[geral["Condicao"] != "Pré e pós"][std_cols[1:9]].to_string(index=False))
 
 
 if __name__ == "__main__":

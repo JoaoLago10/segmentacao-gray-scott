@@ -2,8 +2,8 @@
 
 - tabela_visual_{regime}.png: t = 0, dois instantes intermediários e o final; linhas com A bruto,
   A pré-processado, GT e as máscaras das 3 arquiteturas nas 4 condições (mapa de erros).
-- heatmap_dice.png: Dice de teste para P0--P10 x Q0--Q10, por arquitetura (as 4 condições numa grade).
-- curvas_treino.png: perda de treino e validação nas 20 épocas.
+- heatmap_dice.png: Dice de teste para P0--P10 x Q0--Q5, por arquitetura (as 4 condições numa grade).
+- curvas_treino.png: Dice de validação por época e melhor época (checkpoint).
 - dice_por_regime.png: Dice por regime na condição de referência e na melhor combinação.
 
 As "melhores" condições de cada arquitetura são escolhidas pelo Dice de **validação**.
@@ -31,7 +31,7 @@ from src.data.experiment import ROOT, load_config, load_split  # noqa: E402
 from src.ground_truth.generation import TAU, gt_mask, valid_frames  # noqa: E402
 from src.models import ARCH_NAMES  # noqa: E402
 
-ARCH_COLORS = {"pointnet": "#2a78d6", "pointnet2": "#eb6834", "dgcnn": "#1baf7a"}
+ARCH_COLORS = {"unet": "#2a78d6", "segformer": "#eb6834", "mask2former": "#1baf7a"}
 INK, MUTED, GRID = "#1f1f1e", "#6b6a63", "#e1e0d9"
 DIVERGE = LinearSegmentedColormap.from_list("azul_cinza_vermelho", ["#2a78d6", "#f0efec", "#e34948"])
 # Mapa de erros: TN, TP, FP, FN
@@ -161,6 +161,7 @@ def heatmaps(geral, fig_dir, archs):
 
 
 def curves(out_dir, fig_dir, archs):
+    """Dice de validação por época (o ponto marca a melhor época, usada no best_model.pt)."""
     pres = preprocessing.PRE_IDS
     fig, axes = plt.subplots(2, 6, figsize=(12, 4.2), sharex=True, sharey=True)
     for ax, p in zip(axes.ravel(), pres):
@@ -168,18 +169,19 @@ def curves(out_dir, fig_dir, archs):
             f = out_dir / "runs" / f"{a}_{p}.json"
             if not f.exists():
                 continue
-            h = json.loads(f.read_text())["historico"]
+            run = json.loads(f.read_text())
+            h = run["historico"]
             e = [x["epoca"] for x in h]
-            ax.plot(e, [x["perda_treino"] for x in h], color=ARCH_COLORS[a], lw=1.5, label=f"{ARCH_NAMES[a]} treino")
-            ax.plot(e, [x["perda_valid"] for x in h], color=ARCH_COLORS[a], lw=1.5, ls="--",
-                    label=f"{ARCH_NAMES[a]} validação")
-        ax.set_title("nenhum" if p == "P0" else p, color=INK)
+            ax.plot(e, [x["dice_valid"] for x in h], color=ARCH_COLORS[a], lw=1.5, label=ARCH_NAMES[a])
+            ax.plot(run["melhor_epoca"], run["dice_valid_melhor"], "o", ms=5, color=ARCH_COLORS[a],
+                    mec="white", mew=1)
+        ax.set_title("baseline" if p == "P0" else p, color=INK)
         ax.grid(color=GRID, lw=0.5)
         ax.spines[["top", "right"]].set_visible(False)
     axes.ravel()[-1].axis("off")
     h, l = axes.ravel()[0].get_legend_handles_labels()
-    axes.ravel()[-1].legend(h, l, loc="center", frameon=False, fontsize=7)
-    fig.supxlabel("Época"); fig.supylabel("Perda (BCE + Dice)")
+    axes.ravel()[-1].legend(h, l, loc="center", frameon=False, fontsize=8)
+    fig.supxlabel("Época"); fig.supylabel("Dice na validação")
     fig.savefig(fig_dir / "curvas_treino.png")
     plt.close(fig)
 

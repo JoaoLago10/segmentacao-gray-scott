@@ -1,7 +1,8 @@
 """Pré-processamentos P1--P10 aplicados ao campo de entrada A.
 
 Regras (Seções 0.5 e 2.3 do histórico):
-- Uma transformação por experimento; P0 = "nenhum" (dados brutos, condição "sem pré").
+- Uma transformação por experimento; P0 = baseline (A bruto, que já é uma concentração
+  adimensional em [0,09; 1]: a escala física é a normalização padrão; sem filtro espacial).
 - Estatísticas (P1--P5) ajustadas **só no treino** e reaplicadas sem recalibração na
   validação e no teste.
 - Filtros espaciais (P6--P10) respeitam o contorno periódico (modo ``wrap``).
@@ -96,15 +97,15 @@ class Percentis(Pre):
         return np.clip(x, self.params["lo"], self.params["hi"])
 
 
-class Log(Pre):
-    """y = log(max(A, 0) + eps). A > 0 em t > 0 (mín. 0,09), mas o eps explícito cobre zeros."""
+class RMS(Pre):
+    """a = A / RMS(A), com RMS = sqrt(mean(A^2)) no treino: escala pela magnitude, sem centralizar."""
 
-    def __init__(self, *a, eps=1e-3, **k):
-        super().__init__(*a, **k)
-        self.params = {"eps": eps}
+    def fit(self, train):
+        self.params = {"rms": float(np.sqrt(np.mean(np.square(train, dtype=np.float64))))}
+        return self
 
     def transform(self, x):
-        return np.log(np.maximum(x, 0.0) + self.params["eps"])
+        return x / self.params["rms"]
 
 
 # ----------------------------------------------------------------- espaciais
@@ -197,18 +198,19 @@ class Wavelet(Pre):
 
 
 def build(pid: str) -> Pre:
+    # Numeração do protocolo da turma (PROTOCOLO.MD, Seção 6).
     table = {
-        "P0": (Nenhum, "Nenhum (dados brutos)"),
+        "P0": (Nenhum, "Baseline (A bruto, sem filtro)"),
         "P1": (ZScore, "Normalização Z-score"),
-        "P2": (MinMax, "Normalização Min-Max"),
-        "P3": (Robusta, "Normalização robusta (mediana e IQR)"),
-        "P4": (Percentis, "Recorte por percentis"),
-        "P5": (Log, "Transformação logarítmica"),
-        "P6": (Gaussiano, "Filtro gaussiano"),
-        "P7": (Mediana, "Filtro de mediana"),
-        "P8": (Bilateral, "Filtro bilateral"),
-        "P9": (PeronaMalik, "Difusão anisotrópica"),
-        "P10": (Wavelet, "Redução de ruído por wavelets"),
+        "P2": (RMS, "Normalização RMS"),
+        "P3": (Robusta, "Robust scaling (mediana e IQR)"),
+        "P4": (MinMax, "Normalização Min-Max"),
+        "P5": (Percentis, "Percentile clipping"),
+        "P6": (Gaussiano, "Gaussian smoothing"),
+        "P7": (Mediana, "Median filtering"),
+        "P8": (Bilateral, "Bilateral filtering"),
+        "P9": (PeronaMalik, "Anisotropic diffusion"),
+        "P10": (Wavelet, "Wavelet denoising"),
     }
     cls, nome = table[pid]
     return cls(pid, nome)

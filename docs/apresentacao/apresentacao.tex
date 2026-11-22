@@ -29,7 +29,7 @@
       \textbf{Pergunta:} onde estão as estruturas e como evoluem no tempo?
       \begin{itemize}
         \item Segmentação 2D dos padrões de Turing.
-        \item 10 pré (P1--P10) $\times$ 3 redes de \textbf{nuvem de pontos} (PointNet, PointNet++, DGCNN; 20 épocas) $\times$ 10 pós (Q1--Q10) = 300 combinações.
+        \item Protocolo da turma: 10 pré (P1--P10) $\times$ 3 redes (U-Net, SegFormer, Mask2Former; 20 épocas) $\times$ 5 pós (Q1--Q5) = 150 combinações.
         \item Quatro condições: sem pré/pós, só pré, só pós, pré + pós.
         \item Dados: campos $A$ e $B$, $128 \times 128$, periódicos, 1001 instantes, 1200 trajetórias.
       \end{itemize}
@@ -155,41 +155,42 @@
     \item \textbf{GT:} $M=\mathbb{1}[B>\tau]$, $\tau=0{,}151$ (Otsu global do treino), gerado em cada frame
       (o ``frame médio'' define o critério).
     \item \textbf{Resolução:} $128\times128$ mantida (já é o menor fluido do The Well; reduzir apagaria estruturas de 4--8 px).
-    \item \textbf{Redes:} PointNet, PointNet++ e DGCNN, 20 épocas.
+    \item \textbf{Redes:} U-Net (do zero), SegFormer e Mask2Former (pré-treinadas); 20 épocas, melhor época pela validação.
+    \item \textbf{Dados:} todas as 1200 trajetórias (${\sim}$2,8 GB, teto de 25 GB).
   \end{itemize}
 \end{frame}
 
 % ------------------------------------------------------------
-\begin{frame}{Frame como nuvem de pontos}
-  \begin{itemize}
-    \item Cada pixel vira um ponto $\mathbf{p}_i=(x_i,y_i,a_i)$, com $a_i=\mathcal{P}(A)$ (campo $A$ pré-processado).
-    \item Rótulo do ponto: $\mathbb{1}[B_i>\tau]$. Só $A$ entra na rede, para evitar vazamento de rótulo.
-    \item Treino em blocos periódicos $64\times64$ (4096 pontos); inferência com 16 blocos sobrepostos.
-    \item Aumento de dados: rotação de $90^\circ$, reflexão, translação circular e permutação dos pontos.
-  \end{itemize}
-  \vspace{0.3em}
-  \begin{tabular}{lll}
+\begin{frame}{Arquiteturas (protocolo da turma)}
+  \begin{tabular}{llll}
     \toprule
-    Rede & Ideia & Contexto espacial \\
+    Rede & Ideia & Saída & Pesos \\
     \midrule
-    PointNet & MLP por ponto + max-pool global & nenhum (só global) \\
-    PointNet++ & set abstraction hierárquico (FPS + $k$-NN) & local, multiescala \\
-    DGCNN & EdgeConv em grafo $k$-NN dinâmico & local + semântico \\
+    U-Net & convolução + \emph{skip connections}, padding circular & $128\times128$ & do zero \\
+    SegFormer (B0) & Transformer hierárquico + decoder MLP & $32\times32$ & ImageNet \\
+    Mask2Former (Swin-T) & consultas + atenção mascarada & $32\times32$ & ADE20K \\
     \bottomrule
   \end{tabular}
+  \vspace{0.6em}
+  \begin{itemize}
+    \item Entrada: só $A$ ($128\times128$, sem upscaling, nem dentro das redes). GT: $B>\tau$.
+    \item Os Transformers predizem a 1/4 da resolução: estruturas de 4--8 px viram 1--2 px.
+    \item Aumento de dados: rotação, reflexão e translação circular.
+  \end{itemize}
 \end{frame}
 
 % ------------------------------------------------------------
 \begin{frame}{Quatro condições e protocolo}
   \begin{itemize}
-    \item Sem pré e sem pós $\cdot$ somente pré (P1--P10) $\cdot$ somente pós (Q1--Q10) $\cdot$ pré e pós (300).
-    \item 33 treinos (3 redes $\times$ 11 entradas); os pós são aplicados às probabilidades salvas, sem retreinar.
+    \item Sem pré e sem pós $\cdot$ somente pré (P1--P10) $\cdot$ somente pós (Q1--Q5) $\cdot$ pré e pós (150).
+    \item 33 treinos de 20 épocas (3 redes $\times$ 11 entradas), checkpoint da melhor época de validação.
+    \item Os pós são aplicados às probabilidades salvas, sem retreinar.
     \item Parâmetros de pré ajustados no treino e de pós na validação; o teste é usado uma vez.
     \item Operações espaciais e componentes conexos \textbf{periódicos}.
     \item Métricas por trajetória: IoU, Dice, Precision, Recall (IC 95\% bootstrap), temporais, latência e memória.
   \end{itemize}
-  \textbf{Hipóteses:} normalizações afins são neutras (BN); filtros não ajudam em dados sem ruído
-  (gaussiano piora); CRF ajuda mais a PointNet.
+  \textbf{Hipóteses:} normalizações afins são neutras na U-Net (BN), mas não nas redes pré-treinadas;
+  filtros não ajudam em dados sem ruído (gaussiano piora); o limiar otimizado ajuda mais os Transformers.
 \end{frame}
 
 % ------------------------------------------------------------
@@ -197,7 +198,7 @@
   \centering
   \includegraphics[width=\linewidth,height=0.75\textheight,keepaspectratio]{heatmap_dice.png}
 
-  \small Piloto apenas para validar o pipeline (4 épocas, poucos dados); números finais em GPU.
+  \small Piloto apenas para validar o pipeline (4 épocas, 4 trajetórias por regime); números finais em GPU.
 \end{frame}
 
 % ------------------------------------------------------------
