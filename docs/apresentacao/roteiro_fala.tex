@@ -25,7 +25,7 @@ no dataset Gray-Scott, do The Well.
 A pergunta que guia o trabalho é: onde estão as estruturas e como elas evoluem no tempo?
 Para responder, vamos segmentar os padrões de Turing do Gray-Scott, um sistema de
 reação-difusão com duas concentrações químicas, $A$ e $B$. O experimento cruza dez
-pré-processamentos, três redes de nuvem de pontos (PointNet, PointNet++ e DGCNN, treinadas por 20 épocas) e dez pós-processamentos,
+pré-processamentos, três redes (U-Net, SegFormer e Mask2Former, treinadas por 20 épocas) e cinco pós-processamentos, seguindo o protocolo da turma,
 o que dá trezentas combinações. O dataset tem seis regimes, definidos pelos parâmetros $f$ e $k$,
 e cada regime gera um padrão diferente: pontos, labirintos, espirais, entre outros.
 
@@ -70,17 +70,19 @@ define o critério, e a máscara acompanha a evolução do padrão. Excluímos o
 o instante inicial. Mantivemos a resolução de 128 por 128, que já é a menor do The Well:
 reduzir mais apagaria estruturas que têm só 4 a 8 pixels de largura.
 
-\slide{9}{Frame como nuvem de pontos}
-Seguindo a orientação do professor, usamos redes de nuvem de pontos. Cada pixel vira um ponto
-com coordenadas $x$, $y$ e o valor de $A$. A PointNet olha cada ponto isoladamente, mais um
-resumo global. A PointNet++ agrupa vizinhanças em várias escalas. O DGCNN liga cada ponto aos
-vizinhos num grafo que é recalculado a cada camada.
+\slide{9}{Arquiteturas}
+Seguimos as três redes do protocolo da turma. A U-Net é convolucional, trabalha na resolução
+completa e usa padding circular, porque o domínio é periódico. O SegFormer e o Mask2Former são
+Transformers pré-treinados em imagens naturais, mas predizem em um quarto da resolução: uma
+estrutura de 4 a 8 pixels vira 1 ou 2 pixels na saída. Não ampliamos a entrada, como pede o
+protocolo.
 
 \slide{10}{Quatro condições e protocolo}
-Avaliamos quatro condições: sem pré e sem pós, somente pré, somente pós e as duas juntas. Os
-parâmetros de pré são ajustados no treino e os de pós na validação. O teste é usado uma única
-vez. Nossa hipótese é que normalizações não mudam nada, porque a normalização em lote das redes
-absorve qualquer mudança de escala. Também esperamos que os filtros não ajudem, porque os dados
+Avaliamos quatro condições: sem pré e sem pós, somente pré, somente pós e as duas juntas. Cada rede
+treina 20 épocas, e guardamos o modelo da melhor época na validação. Os parâmetros de pré são
+ajustados no treino e os de pós na validação. O teste é usado uma única
+vez. Nossa hipótese é que normalizações não mudam nada na U-Net, porque a normalização em lote absorve
+qualquer mudança de escala, mas podem mudar as redes pré-treinadas. Também esperamos que os filtros não ajudem, porque os dados
 de simulação não têm ruído: o que o filtro remove é sinal.
 
 \slide{11}{Piloto: mapa pré por pós}

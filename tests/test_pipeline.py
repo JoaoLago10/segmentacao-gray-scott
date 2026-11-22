@@ -3,7 +3,7 @@ import pytest
 import torch
 
 from src import models, postprocessing, preprocessing
-from src.data.experiment import BlockDataset, periodic_crop, predict_frames
+from src.data.experiment import FrameDataset, predict_frames
 from src.evaluation.metrics import bootstrap_ci, confusion, scores, temporal
 
 rng = np.random.default_rng(0)
@@ -46,15 +46,13 @@ def test_q5_periodico():
     """Um objeto cortado pelas bordas conta como um só componente no toro."""
     P = np.zeros((1, 128, 128), np.float32)
     P[0, :3, :3] = P[0, -3:, :3] = P[0, :3, -3:] = P[0, -3:, -3:] = 1  # 36 px no toro
-    assert postprocessing.apply("Q5", P, P, area_min=32).sum() == 36
-    assert postprocessing.apply("Q5", P, P, area_min=37).sum() == 0
+    assert postprocessing.apply("Q4", P, P, area_min=32).sum() == 36
+    assert postprocessing.apply("Q4", P, P, area_min=37).sum() == 0
 
 
-def test_q6_preenche_buraco():
-    P = np.zeros((1, 128, 128), np.float32)
-    P[0, 10:20, 10:20] = 1
-    P[0, 14:16, 14:16] = 0
-    assert postprocessing.apply("Q6", P, P, area_max=4)[0, 10:20, 10:20].all()
+def test_rms():
+    p = preprocessing.build("P2").fit(A3)
+    np.testing.assert_allclose(np.sqrt(np.mean(p(A3) ** 2)), 1, rtol=1e-4)
 
 
 def test_metricas():
@@ -72,30 +70,41 @@ def test_metricas():
 
 
 @pytest.mark.parametrize("arch", list(models.ARCHS))
-def test_modelos_forma_e_permutacao(arch):
+def test_modelos_forma_e_perda(arch):
     torch.manual_seed(0)
-    m = models.build(arch).eval()
-    x = torch.randn(2, 256, 3)
+    m = models.build(arch, pretrained=False)
+    x = torch.rand(2, 1, 128, 128)
+    y = (torch.rand(2, 128, 128) > 0.7).float()
+    loss = m.loss(x, y)
+    loss.backward()
+    assert torch.isfinite(loss)
+    m.eval()
     with torch.no_grad():
-        y = m(x)
-        perm = torch.randperm(256)
-        y2 = m(x[:, perm])
-    assert y.shape == (2, 256)
-    if arch != "pointnet2":  # FPS começa no 1º ponto em eval: o subconjunto amostrado depende da ordem
-        torch.testing.assert_close(y[:, perm], y2, atol=1e-4, rtol=1e-4)
+        p = m.predict_proba(x)
+    assert p.shape == (2, 128, 128) and float(p.min()) >= 0 and float(p.max()) <= 1
 
 
-def test_bloco_e_inferencia():
+def test_unet_periodica():
+    """U-Net com padding circular comuta com translações por múltiplos de 16 px (4 poolings)."""
+    torch.manual_seed(0)
+    m = models.build("unet").eval()
+    x = torch.rand(1, 1, 128, 128)
+    with torch.no_grad():
+        a = m.predict_proba(torch.roll(x, (16, 32), (2, 3)))
+        b = torch.roll(m.predict_proba(x), (16, 32), (1, 2))
+    torch.testing.assert_close(a, b, atol=1e-5, rtol=1e-4)
+
+
+def test_dataset_e_inferencia():
     M = (A3 > 0.5).astype(np.uint8)
-    ds = BlockDataset(A3, M, 64, train=True)
-    pts, lab = ds[0]
-    assert pts.shape == (4096, 3) and lab.shape == (4096,)
-    # o rótulo acompanha o ponto: limiar no atributo reproduz a máscara do bloco
-    np.testing.assert_array_equal((pts[:, 2] > 0.5).numpy(), lab.numpy().astype(bool))
-    np.testing.assert_array_equal(periodic_crop(A3[0], 120, 120, 16)[:8, :8], A3[0, 120:, 120:])
+    ds = FrameDataset(A3, M, train=True)
+    x, y = ds[0]
+    assert x.shape == (1, 128, 128) and y.shape == (128, 128)
+    # o rótulo acompanha o pixel após rotação/reflexão/translação
+    np.testing.assert_array_equal((x[0] > 0.5).numpy(), y.numpy().astype(bool))
 
-    class Ident(torch.nn.Module):
-        def forward(self, x):
-            return (x[..., 2] - 0.5) * 100
-    P = predict_frames(Ident(), A3, 64, 32, "cpu", batch=8)
+    class Limiar(torch.nn.Module):
+        def predict_proba(self, x):
+            return torch.sigmoid((x[:, 0] - 0.5) * 100)
+    P = predict_frames(Limiar(), A3, "cpu", batch=2)
     np.testing.assert_array_equal(P > 0.5, A3 > 0.5)

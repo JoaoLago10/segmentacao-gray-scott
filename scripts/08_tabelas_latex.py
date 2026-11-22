@@ -1,8 +1,8 @@
 """Gera as tabelas LaTeX do artigo a partir dos CSVs (formato padronizado da turma).
 
 Saídas em docs/artigo/tabelas/{exp,piloto}/:
-    t_condicoes_123.tex   condições 1--3 (63 linhas), ordem sequencial padronizada
-    t_condicao_4.tex      condição 4 (300 linhas, longtable, apêndice)
+    t_condicoes_123.tex   condições 1--3 (3 + 30 + 15 linhas), ordem sequencial padronizada
+    t_condicao_4.tex      condição 4 (150 linhas, longtable, apêndice)
     t_resumo.tex          referência e melhores combinações (escolhidas na validação) por arquitetura
     t_temporais.tex       métricas temporais das mesmas combinações
     t_regimes.tex         Dice por regime nas mesmas combinações
@@ -144,15 +144,20 @@ def main():
     (out / "t_regimes.tex").write_text("\n".join(lines))
 
     lines = [r"\begin{table}[t]\centering\scriptsize",
-             r"\caption{Custo computacional por arquitetura (média sobre os pré-processamentos). Latência por "
-             r"frame $128\times128$ só da rede, com todos os blocos do frame num lote." + nota + r"}\label{tab:custo}",
-             r"\begin{tabular}{lccccc}", r"\toprule",
-             r"Arquitetura & Parâmetros (M) & Épocas & Treino (min) & Latência (ms) & Memória (MB) \\", r"\midrule"]
+             r"\caption{Custo e treino por arquitetura (média sobre os 11 pré-processamentos). Latência por "
+             r"frame $128\times128$ (lote de 1), só da rede. Melhor época = época do checkpoint escolhido pelo Dice "
+             r"de validação (mín.--máx.)." + nota + r"}\label{tab:custo}",
+             r"\begin{tabular}{lcccccc}", r"\toprule",
+             r"Arquitetura & Parâmetros (M) & Pesos iniciais & Melhor época & Treino (min) & Latência (ms) & Memória (MB) \\",
+             r"\midrule"]
     for a in esc:
         rs = [v for k, v in runs.items() if k.startswith(a + "_")]
         n = len(rs)
-        lines.append(f"{ARCH_NAMES[a]} & {rs[0]['n_parametros'] / 1e6:.2f}".replace(".", ",")
-                     + f" & {rs[0]['epocas']} & {lat(sum(r['tempo_treino_s'] for r in rs) / n / 60)} & "
+        eps = [r["melhor_epoca"] for r in rs]
+        lines.append(f"{ARCH_NAMES[a]} & " + f"{rs[0]['n_parametros'] / 1e6:.1f}".replace(".", ",")
+                     + f" & {'pré-treinados' if rs[0].get('pretreinado') else 'aleatórios'}"
+                     + f" & {min(eps)}--{max(eps)} de {rs[0]['epocas']}"
+                     + f" & {lat(sum(r['tempo_treino_s'] for r in rs) / n / 60)} & "
                      f"{lat(sum(r['latencia_rede_ms_frame'] for r in rs) / n)} & "
                      f"{lat(sum(r['memoria_pico_MB'] for r in rs) / n)} \\\\")
     dev = next(iter(runs.values()))

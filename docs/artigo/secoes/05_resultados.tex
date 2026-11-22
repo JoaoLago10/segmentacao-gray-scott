@@ -4,7 +4,7 @@
 \ifthenelse{\equal{\resdir}{piloto}}{%
 \noindent\fbox{\parbox{0.97\linewidth}{\small\textbf{Atenção:} esta versão mostra o \emph{piloto} reduzido
 (CPU; 4 trajetórias de treino por regime, 4 épocas, pré P0, P1, P6 e P9, 3 trajetórias de teste por
-regime e 4 blocos por frame). Ele valida o pipeline de ponta a ponta, mas \emph{não} é o experimento
+regime com frames a cada 1000 s). Ele valida o pipeline de ponta a ponta, mas \emph{não} é o experimento
 do artigo. Os números finais vêm de \texttt{bash scripts/rodar\_tudo.sh} em GPU, com
 \texttt{\textbackslash resdir} trocado para \texttt{exp}.}}\par\medskip}{}
 
@@ -33,9 +33,9 @@ condições (pré/pós escolhidos na validação; legenda \emph{pré / pós}).}
 
 \subsection{Tabela de métricas padronizada}
 A Tabela~\ref{tab:condicoes123} traz, em ordem sequencial, as condições sem pré e sem pós, somente
-pré e somente pós. A condição pré e pós completa está no Apêndice (Tabela~\ref{tab:condicao4}), e a
+pré e somente pós. A condição pré e pós completa (150 linhas) está no Apêndice (Tabela~\ref{tab:condicao4}), e a
 Tabela~\ref{tab:resumo} resume, por arquitetura, a referência e a melhor configuração de cada
-condição. A Figura~\ref{fig:heatmap} mostra as 363 combinações de uma vez: a célula
+condição. A Figura~\ref{fig:heatmap} mostra as 198 configurações de uma vez: a célula
 (nenhum, nenhum) é a referência, a linha ``nenhum'' é somente pós, a coluna ``nenhum'' é somente
 pré e o restante é pré e pós.
 
@@ -62,6 +62,7 @@ referência (sem pré e sem pós, célula destacada).}
 
 \begin{figure}[t]\centering
 \includegraphics[width=\textwidth]{\figres{curvas_treino}}
-\caption{Perda de treino (contínua) e de validação (tracejada) por época, para cada pré-processamento.}
+\caption{Dice de validação por época, para cada pré-processamento. O ponto marca a melhor época,
+cujo checkpoint (\texttt{best\_model.pt}) é usado no teste.}
 \label{fig:curvas}
 \end{figure}

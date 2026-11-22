@@ -36,11 +36,15 @@ def split_path(cfg: dict, name: str) -> Path:
 def fetch_split(cfg: dict, name: str) -> Path:
     """Baixa (leitura parcial do Hugging Face) e salva ``{name}.npz`` com todos os regimes."""
     out = split_path(cfg, name)
-    if out.exists():
-        return out
     spec = cfg["dados"][name]
     split = spec.get("split", name)
     times = frame_indices(spec["frames"])
+    n_traj = 1 if "traj" in spec else len(split_trajs(split, spec["trajs_por_regime"]))
+    if out.exists():  # reaproveita só se as trajetórias e os frames coincidirem com a configuração
+        with np.load(out) as d:
+            if list(d["times"]) == times and len(d["traj"]) == n_traj * len(REGIMES):
+                return out
+        print(f"  {name}: configuração mudou, baixando de novo", flush=True)
     parts = {"A": [], "B": [], "regime": [], "traj": []}
     for r in REGIMES:
         trajs = [spec["traj"]] if "traj" in spec else split_trajs(split, spec["trajs_por_regime"])
@@ -62,74 +66,42 @@ def load_split(cfg: dict, name: str) -> dict:
     return {k: d[k] for k in d.files}
 
 
-# ------------------------------------------------------------ nuvem de pontos
-def block_coords(size: int) -> np.ndarray:
-    """Coordenadas (size*size, 2) normalizadas em [-1, 1] dos pixels de um bloco."""
-    c = np.linspace(-1.0, 1.0, size, dtype=np.float32)
-    yy, xx = np.meshgrid(c, c, indexing="ij")
-    return np.stack([xx.ravel(), yy.ravel()], -1)
+# ---------------------------------------------------------------- frames
+class FrameDataset(torch.utils.data.Dataset):
+    """Frames inteiros (1, H, W) com máscara (H, W).
 
+    Aumento de dados no treino (preserva a física: campo escalar, domínio periódico e
+    isotrópico): rotação de 90 graus, reflexão e translação circular aleatórias.
+    """
 
-def periodic_crop(img: np.ndarray, i0: int, j0: int, size: int) -> np.ndarray:
-    H, W = img.shape[-2:]
-    rows = (np.arange(size) + i0) % H
-    cols = (np.arange(size) + j0) % W
-    return img[..., rows[:, None], cols[None, :]]
-
-
-class BlockDataset(torch.utils.data.Dataset):
-    """Um bloco periódico aleatório por frame e por época (aumento de dados incluído)."""
-
-    def __init__(self, A_pre: np.ndarray, M: np.ndarray, size: int, train: bool = True):
-        self.A, self.M, self.size, self.train = A_pre, M, size, train
-        self.xy = block_coords(size)
+    def __init__(self, A_pre: np.ndarray, M: np.ndarray, train: bool = True):
+        self.A, self.M, self.train = A_pre, M, train
 
     def __len__(self):
         return len(self.A)
 
     def __getitem__(self, i):
-        # Semente derivada do gerador do torch: muda a cada época e a cada worker, e é
-        # reprodutível a partir de torch.manual_seed.
-        rng = (np.random.default_rng((int(torch.randint(1 << 31, (1,))), i))
-               if self.train else None)
-        H, W = self.A.shape[-2:]
-        i0, j0 = (rng.integers(0, H), rng.integers(0, W)) if self.train else (0, 0)
-        a = periodic_crop(self.A[i], i0, j0, self.size)
-        m = periodic_crop(self.M[i], i0, j0, self.size)
+        a, m = self.A[i], self.M[i]
         if self.train:
+            # semente derivada do torch: muda a cada época/worker e é reprodutível por torch.manual_seed
+            rng = np.random.default_rng((int(torch.randint(1 << 31, (1,))), i))
             k = int(rng.integers(4))
-            a, m = np.rot90(a, k), np.rot90(m, k)
+            sh = (int(rng.integers(a.shape[0])), int(rng.integers(a.shape[1])))
+            a, m = np.rot90(np.roll(a, sh, (0, 1)), k), np.rot90(np.roll(m, sh, (0, 1)), k)
             if rng.random() < 0.5:
                 a, m = a[:, ::-1], m[:, ::-1]
-        pts = np.concatenate([self.xy, a.reshape(-1, 1)], 1).astype(np.float32)
-        lab = m.reshape(-1).astype(np.float32)
-        if self.train:
-            perm = rng.permutation(len(lab))
-            pts, lab = pts[perm], lab[perm]
-        return torch.from_numpy(pts), torch.from_numpy(lab)
+        return (torch.from_numpy(np.ascontiguousarray(a, np.float32))[None],
+                torch.from_numpy(np.ascontiguousarray(m, np.float32)))
 
 
 @torch.no_grad()
-def predict_frames(model, A_pre: np.ndarray, size: int, stride: int, device, batch: int = 32) -> np.ndarray:
-    """Probabilidades (N, H, W) por média de blocos periódicos sobrepostos."""
-    N, H, W = A_pre.shape
-    offs = [(i, j) for i in range(0, H, stride) for j in range(0, W, stride)]
-    xy = torch.from_numpy(block_coords(size)).to(device)
-    acc = np.zeros((N, H, W), np.float32)
-    cnt = np.zeros((H, W), np.float32)
-    for i0, j0 in offs:
-        rows = (np.arange(size) + i0) % H
-        cols = (np.arange(size) + j0) % W
-        cnt[np.ix_(rows, cols)] += 1
-    jobs = [(n, i0, j0) for n in range(N) for i0, j0 in offs]
-    for s in range(0, len(jobs), batch):
-        chunk = jobs[s:s + batch]
-        a = np.stack([periodic_crop(A_pre[n], i0, j0, size) for n, i0, j0 in chunk])
-        a = torch.from_numpy(a.reshape(len(chunk), -1, 1).astype(np.float32)).to(device)
-        pts = torch.cat([xy.expand(len(chunk), -1, -1), a], -1)
-        p = torch.sigmoid(model(pts)).float().cpu().numpy().reshape(len(chunk), size, size)
-        for (n, i0, j0), pb in zip(chunk, p):
-            rows = (np.arange(size) + i0) % H
-            cols = (np.arange(size) + j0) % W
-            acc[n][np.ix_(rows, cols)] += pb
-    return acc / cnt
+def predict_frames(model, A_pre: np.ndarray, device, batch: int = 32, amp: bool = False) -> np.ndarray:
+    """Probabilidades (N, H, W) de P(padrão) por pixel, frame inteiro por vez."""
+    out = []
+    for s in range(0, len(A_pre), batch):
+        x = torch.from_numpy(np.ascontiguousarray(A_pre[s:s + batch], np.float32))[:, None].to(device)
+        with torch.autocast(device.type if hasattr(device, "type") else str(device),
+                            enabled=amp and str(device).startswith("cuda")):
+            p = model.predict_proba(x)
+        out.append(p.float().cpu().numpy())
+    return np.concatenate(out)

@@ -1,21 +1,20 @@
 \section{Conclusão}
 \label{sec:conclusao}
 
-Apresentamos um protocolo de segmentação dos padrões de Turing do Gray-Scott em que cada frame é
-tratado como uma nuvem de pontos $(x,y,a)$, com GT físico ($B>\tau$), entrada restrita a $A$ para
-evitar vazamento de rótulo, operações periódicas, divisão oficial por trajetória e seleção de
-parâmetros só na validação. A análise mecanística prevê três resultados:
+Apresentamos a segmentação dos padrões de Turing do Gray-Scott segundo o protocolo comum da turma.
+O GT é físico ($B>\tau$, congelado antes da comparação), e a entrada é restrita a $A$ para evitar
+vazamento de rótulo. Usamos todas as 1200 trajetórias da divisão oficial, resolução nativa
+$128\times128$ sem ampliação, 20 épocas com checkpoint da melhor época de validação, operações
+periódicas e seleção de parâmetros só na validação. A análise mecanística prevê quatro resultados:
 \begin{enumerate}
-  \item normalizações afins são neutras em redes com BN;
-  \item filtros espaciais não ajudam em dados de simulação sem ruído, e o gaussiano piora a
-    fronteira;
-  \item pós-processamentos que trazem contexto espacial ou o próprio dado (CRF) beneficiam mais
-    a rede sem vizinhança (PointNet).
+  \item normalizações afins (P1--P4) são neutras na U-Net, por causa da normalização em lote, mas
+    podem afetar as redes pré-treinadas, que esperam entradas na escala do ImageNet;
+  \item filtros espaciais (P6--P10) não ajudam em dados de simulação sem ruído, e o gaussiano piora
+    a fronteira;
+  \item a U-Net, que prediz na resolução completa, supera SegFormer e Mask2Former nas estruturas
+    pequenas, cujos erros se concentram nas bordas reconstruídas a partir de $1/4$ da resolução;
+  \item a filtragem temporal (Q5) só é segura nos regimes estáticos.
 \end{enumerate}
-No piloto, (2) se confirmou (o gaussiano foi o pior pré nas três redes, com a maior perda no
-PointNet) e (3) foi refutada: o CRF ajudou o PointNet++, cujo erro dominante é FP de borda, e não o
-PointNet. O resultado (1) só se confirmou para o PointNet, porque em poucas épocas o Z-score
-melhorou a otimização das redes com vizinhança. O DGCNN foi a melhor arquitetura, e a filtragem
-temporal só é segura nos regimes estáticos.
-\revisar{Atualizar com os números finais do experimento completo.} As tabelas estão no formato
-padronizado da turma, prontas para o artigo de benchmark entre fluidos.
+%CONCLUSAO_PILOTO%
+\revisar{Atualizar com os números finais do experimento completo.} As tabelas estão no esquema
+padronizado do protocolo, prontas para o artigo de benchmark entre sistemas físicos.

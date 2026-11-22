@@ -34,8 +34,11 @@ estruturas fornece métricas físicas interpretáveis para validar esses modelos
 do número de manchas e a coerência temporal das frentes. Essas métricas complementam erros
 pixel a pixel como o VRMSE.
 
-\paragraph{Por que nuvem de pontos} Campos de simulação vêm de malhas regulares, adaptativas ou
-não estruturadas. Representar cada amostra como um conjunto de pontos $(x,y,a)$ torna o mesmo
-modelo aplicável a qualquer discretização e a resoluções diferentes entre fluidos, sem
-reamostragem para uma grade comum. Esse é um requisito do benchmark que junta os fluidos da
-turma.
+\paragraph{Por que segmentar como imagem} Os campos do The Well estão em grades regulares, e o
+protocolo da turma limita todos a no máximo 128 px no maior eixo. Assim, o mesmo conjunto de
+arquiteturas de segmentação semântica de imagens pode ser aplicado a todos os sistemas físicos. As
+três redes cobrem as três famílias dominantes: convolucional com \emph{skip connections} (U-Net),
+\emph{Transformer} hierárquico com decodificador leve (SegFormer) e classificação de máscaras por
+consultas (Mask2Former). A comparação entre sistemas físicos mede, portanto, como as propriedades de
+cada campo (escala das estruturas, contraste e dinâmica) interagem com o viés indutivo de cada
+família.
