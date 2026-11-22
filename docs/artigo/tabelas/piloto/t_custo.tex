@@ -1,0 +1,13 @@
+\begin{table}[t]\centering\scriptsize
+\caption{Custo e treino por arquitetura (média sobre os 11 pré-processamentos). Latência por frame $128\times128$ (lote de 1), só da rede. Melhor época = época do checkpoint escolhido pelo Dice de validação (mín.--máx.). Resultados do \textbf{piloto} reduzido (CPU), apenas para validar o pipeline.}\label{tab:custo}
+\begin{tabular}{lcccccc}
+\toprule
+Arquitetura & Parâmetros (M) & Pesos iniciais & Melhor época & Treino (min) & Latência (ms) & Memória (MB) \\
+\midrule
+U-Net & 7,8 & aleatórios & 4--4 de 4 & 3,4 & 57,4 & -- \\
+SegFormer & 3,7 & pré-treinados & 2--3 de 4 & 0,8 & 27,7 & -- \\
+Mask2Former & 47,4 & pré-treinados & 2--4 de 4 & 11,3 & 190,8 & -- \\
+\bottomrule
+\end{tabular}
+\par\smallskip Dispositivo: x86\_64 (PyTorch 2.15.0+cpu).
+\end{table}

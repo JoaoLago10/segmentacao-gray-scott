@@ -1,0 +1,23 @@
+\begin{table}[t]\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\caption{Dice no teste por regime (média por trajetória). Resultados do \textbf{piloto} reduzido (CPU), apenas para validar o pipeline.}\label{tab:regimes}
+\begin{tabular}{lllcccccc}
+\toprule
+Arquitetura & Condição & Pré/Pós & Gliders & Bubbles & Maze & Worms & Spirals & Spots \\
+\midrule
+U-Net & Sem pré e sem pós & nenhum/nenhum & 0,934 & 0,970 & 0,973 & 0,977 & 0,955 & 0,967 \\
+U-Net & Somente pré & P6/nenhum & 0,938 & 0,959 & 0,979 & 0,965 & 0,941 & 0,968 \\
+U-Net & Somente pós & nenhum/Q1 & 0,951 & 0,971 & 0,983 & 0,977 & 0,956 & 0,978 \\
+U-Net & Pré e pós & P1/Q1 & 0,955 & 0,961 & 0,988 & 0,979 & 0,963 & 0,985 \\
+\midrule
+SegFormer & Sem pré e sem pós & nenhum/nenhum & 0,768 & 0,862 & 0,816 & 0,839 & 0,822 & 0,756 \\
+SegFormer & Somente pré & P9/nenhum & 0,783 & 0,858 & 0,833 & 0,842 & 0,833 & 0,776 \\
+SegFormer & Somente pós & nenhum/Q1 & 0,836 & 0,853 & 0,869 & 0,845 & 0,862 & 0,763 \\
+SegFormer & Pré e pós & P1/Q1 & 0,790 & 0,864 & 0,877 & 0,852 & 0,849 & 0,787 \\
+\midrule
+Mask2Former & Sem pré e sem pós & nenhum/nenhum & 0,762 & 0,810 & 0,833 & 0,803 & 0,824 & 0,706 \\
+Mask2Former & Somente pré & P9/nenhum & 0,766 & 0,817 & 0,840 & 0,807 & 0,825 & 0,717 \\
+Mask2Former & Somente pós & nenhum/Q1 & 0,761 & 0,817 & 0,837 & 0,801 & 0,829 & 0,702 \\
+Mask2Former & Pré e pós & P9/Q1 & 0,765 & 0,822 & 0,844 & 0,806 & 0,827 & 0,713 \\
+\bottomrule
+\end{tabular}
+\end{table}

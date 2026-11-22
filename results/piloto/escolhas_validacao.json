@@ -1,0 +1,56 @@
+{
+ "unet": {
+  "Sem pré e sem pós": [
+   "P0",
+   "Q0"
+  ],
+  "Somente pré": [
+   "P6",
+   "Q0"
+  ],
+  "Somente pós": [
+   "P0",
+   "Q1"
+  ],
+  "Pré e pós": [
+   "P1",
+   "Q1"
+  ]
+ },
+ "segformer": {
+  "Sem pré e sem pós": [
+   "P0",
+   "Q0"
+  ],
+  "Somente pré": [
+   "P9",
+   "Q0"
+  ],
+  "Somente pós": [
+   "P0",
+   "Q1"
+  ],
+  "Pré e pós": [
+   "P1",
+   "Q1"
+  ]
+ },
+ "mask2former": {
+  "Sem pré e sem pós": [
+   "P0",
+   "Q0"
+  ],
+  "Somente pré": [
+   "P9",
+   "Q0"
+  ],
+  "Somente pós": [
+   "P0",
+   "Q1"
+  ],
+  "Pré e pós": [
+   "P9",
+   "Q1"
+  ]
+ }
+}

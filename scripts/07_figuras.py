@@ -90,7 +90,7 @@ def visual_tables(cfg, out_dir, fig_dir, params, archs):
                 tag = f"{a}_{p}"
                 Pv = probs(tag, "visual")["P"][iv].astype(np.float32)
                 if len(it) and q != "Q0":
-                    # sequência densa do teste (Q10 precisa de vizinhos no tempo) + t = 0 do conjunto visual
+                    # sequência densa do teste (Q5 precisa de vizinhos no tempo) + t = 0 do conjunto visual
                     # sequência = frames do teste + frames do conjunto visual que faltarem, em ordem temporal
                     pt = probs(tag, "test")
                     jt = np.nonzero((pt["regime"] == r) & (pt["traj"] == traj))[0]

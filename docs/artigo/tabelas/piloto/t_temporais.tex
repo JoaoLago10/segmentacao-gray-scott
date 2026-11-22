@@ -1,0 +1,23 @@
+\begin{table}[t]\centering\scriptsize
+\caption{Métricas temporais no teste (erro em relação ao GT; menor é melhor): variação de área (fração do domínio por passo de 200~s), distância do centroide periódico (px) e consistência temporal (diferença de IoU entre frames consecutivos). Resultados do \textbf{piloto} reduzido (CPU), apenas para validar o pipeline.}\label{tab:temporais}
+\begin{tabular}{llllccc}
+\toprule
+Arquitetura & Condição & Pré & Pós & $E_{\text{área}}$ & $E_{\text{centr.}}$ (px) & $E_{\text{cons.}}$ \\
+\midrule
+U-Net & Sem pré e sem pós & nenhum & nenhum & 0,003 & 10,7 & 0,006 \\
+U-Net & Somente pré & P6 & nenhum & 0,003 & 12,0 & 0,005 \\
+U-Net & Somente pós & nenhum & Q1 & 0,003 & 9,7 & 0,004 \\
+U-Net & Pré e pós & P1 & Q1 & 0,002 & 7,9 & 0,004 \\
+\midrule
+SegFormer & Sem pré e sem pós & nenhum & nenhum & 0,010 & 18,4 & 0,035 \\
+SegFormer & Somente pré & P9 & nenhum & 0,007 & 19,7 & 0,023 \\
+SegFormer & Somente pós & nenhum & Q1 & 0,005 & 17,3 & 0,013 \\
+SegFormer & Pré e pós & P1 & Q1 & 0,006 & 20,3 & 0,021 \\
+\midrule
+Mask2Former & Sem pré e sem pós & nenhum & nenhum & 0,006 & 18,5 & 0,010 \\
+Mask2Former & Somente pré & P9 & nenhum & 0,006 & 18,7 & 0,011 \\
+Mask2Former & Somente pós & nenhum & Q1 & 0,007 & 19,0 & 0,015 \\
+Mask2Former & Pré e pós & P9 & Q1 & 0,008 & 19,2 & 0,017 \\
+\bottomrule
+\end{tabular}
+\end{table}
