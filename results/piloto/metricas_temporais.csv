@@ -1,0 +1,73 @@
+Condicao,Pre,Arquitetura,Pos,ErroArea,ErroCentroide,ErroConsist
+Sem pré e sem pós,nenhum,U-Net,nenhum,0.0027,10.7166,0.0059
+Sem pré e sem pós,nenhum,SegFormer,nenhum,0.0101,18.4468,0.0346
+Sem pré e sem pós,nenhum,Mask2Former,nenhum,0.0062,18.4532,0.0102
+Somente pré,P1,U-Net,nenhum,0.0046,12.2665,0.0194
+Somente pré,P6,U-Net,nenhum,0.0034,11.9998,0.0052
+Somente pré,P9,U-Net,nenhum,0.0030,10.3106,0.0083
+Somente pré,P1,SegFormer,nenhum,0.0140,20.6505,0.0570
+Somente pré,P6,SegFormer,nenhum,0.0091,18.0626,0.0354
+Somente pré,P9,SegFormer,nenhum,0.0070,19.6899,0.0229
+Somente pré,P1,Mask2Former,nenhum,0.0057,18.4008,0.0114
+Somente pré,P6,Mask2Former,nenhum,0.0061,19.1539,0.0104
+Somente pré,P9,Mask2Former,nenhum,0.0060,18.6679,0.0110
+Somente pós,nenhum,U-Net,Q1,0.0026,9.6536,0.0041
+Somente pós,nenhum,U-Net,Q2,0.0028,11.0324,0.0048
+Somente pós,nenhum,U-Net,Q3,0.0027,10.9023,0.0065
+Somente pós,nenhum,U-Net,Q4,0.0027,10.7166,0.0059
+Somente pós,nenhum,U-Net,Q5,0.0141,22.0266,0.1740
+Somente pós,nenhum,SegFormer,Q1,0.0049,17.2799,0.0135
+Somente pós,nenhum,SegFormer,Q2,0.0095,18.9190,0.0305
+Somente pós,nenhum,SegFormer,Q3,0.0118,18.6741,0.0356
+Somente pós,nenhum,SegFormer,Q4,0.0101,18.4451,0.0345
+Somente pós,nenhum,SegFormer,Q5,0.0209,25.4257,0.1242
+Somente pós,nenhum,Mask2Former,Q1,0.0072,19.0188,0.0148
+Somente pós,nenhum,Mask2Former,Q2,0.0062,18.9435,0.0098
+Somente pós,nenhum,Mask2Former,Q3,0.0065,19.0420,0.0111
+Somente pós,nenhum,Mask2Former,Q4,0.0063,18.4534,0.0102
+Somente pós,nenhum,Mask2Former,Q5,0.0219,25.7003,0.0872
+Pré e pós,P1,U-Net,Q1,0.0020,7.9331,0.0038
+Pré e pós,P1,U-Net,Q2,0.0042,12.3752,0.0151
+Pré e pós,P1,U-Net,Q3,0.0048,13.0571,0.0200
+Pré e pós,P1,U-Net,Q4,0.0046,12.2223,0.0194
+Pré e pós,P1,U-Net,Q5,0.0169,21.9970,0.1896
+Pré e pós,P6,U-Net,Q1,0.0034,11.9998,0.0052
+Pré e pós,P6,U-Net,Q2,0.0039,12.5367,0.0066
+Pré e pós,P6,U-Net,Q3,0.0034,11.7720,0.0049
+Pré e pós,P6,U-Net,Q4,0.0034,12.0056,0.0052
+Pré e pós,P6,U-Net,Q5,0.0125,21.7481,0.1649
+Pré e pós,P9,U-Net,Q1,0.0028,9.4088,0.0043
+Pré e pós,P9,U-Net,Q2,0.0031,10.3045,0.0070
+Pré e pós,P9,U-Net,Q3,0.0031,10.1197,0.0090
+Pré e pós,P9,U-Net,Q4,0.0030,10.3024,0.0083
+Pré e pós,P9,U-Net,Q5,0.0152,20.9473,0.1707
+Pré e pós,P1,SegFormer,Q1,0.0056,20.3111,0.0213
+Pré e pós,P1,SegFormer,Q2,0.0134,20.7016,0.0534
+Pré e pós,P1,SegFormer,Q3,0.0166,20.3466,0.0583
+Pré e pós,P1,SegFormer,Q4,0.0140,20.6386,0.0569
+Pré e pós,P1,SegFormer,Q5,0.0201,26.9258,0.1523
+Pré e pós,P6,SegFormer,Q1,0.0054,18.1855,0.0145
+Pré e pós,P6,SegFormer,Q2,0.0086,18.8340,0.0316
+Pré e pós,P6,SegFormer,Q3,0.0106,18.7058,0.0362
+Pré e pós,P6,SegFormer,Q4,0.0092,17.9932,0.0354
+Pré e pós,P6,SegFormer,Q5,0.0201,25.4977,0.1262
+Pré e pós,P9,SegFormer,Q1,0.0070,19.6899,0.0229
+Pré e pós,P9,SegFormer,Q2,0.0067,19.7458,0.0219
+Pré e pós,P9,SegFormer,Q3,0.0080,20.2336,0.0242
+Pré e pós,P9,SegFormer,Q4,0.0070,19.6899,0.0229
+Pré e pós,P9,SegFormer,Q5,0.0225,27.3626,0.1109
+Pré e pós,P1,Mask2Former,Q1,0.0083,18.9350,0.0230
+Pré e pós,P1,Mask2Former,Q2,0.0058,18.6583,0.0114
+Pré e pós,P1,Mask2Former,Q3,0.0058,18.5723,0.0123
+Pré e pós,P1,Mask2Former,Q4,0.0057,18.4430,0.0113
+Pré e pós,P1,Mask2Former,Q5,0.0217,25.3538,0.0908
+Pré e pós,P6,Mask2Former,Q1,0.0090,19.5011,0.0222
+Pré e pós,P6,Mask2Former,Q2,0.0062,19.2105,0.0107
+Pré e pós,P6,Mask2Former,Q3,0.0063,19.3998,0.0110
+Pré e pós,P6,Mask2Former,Q4,0.0061,19.1604,0.0104
+Pré e pós,P6,Mask2Former,Q5,0.0216,25.6591,0.0886
+Pré e pós,P9,Mask2Former,Q1,0.0079,19.2286,0.0165
+Pré e pós,P9,Mask2Former,Q2,0.0057,19.1024,0.0102
+Pré e pós,P9,Mask2Former,Q3,0.0064,19.0275,0.0119
+Pré e pós,P9,Mask2Former,Q4,0.0060,18.6659,0.0110
+Pré e pós,P9,Mask2Former,Q5,0.0221,25.5826,0.0920

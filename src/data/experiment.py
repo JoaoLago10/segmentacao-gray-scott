@@ -1,4 +1,4 @@
-"""Conjuntos do experimento e conversão frame -> nuvem de pontos."""
+"""Conjuntos do experimento (frames inteiros) e inferência em lote."""
 
 from __future__ import annotations
 

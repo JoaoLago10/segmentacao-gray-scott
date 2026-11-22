@@ -1,0 +1,67 @@
+{
+ "arch": "mask2former",
+ "arquitetura": "Mask2Former",
+ "pre": {
+  "id": "P9",
+  "nome": "Anisotropic diffusion",
+  "params": {
+   "iteracoes": 10,
+   "kappa": 0.05,
+   "gamma": 0.2,
+   "modo": "wrap"
+  }
+ },
+ "pretreinado": true,
+ "epocas": 4,
+ "melhor_epoca": 2,
+ "dice_valid_melhor": 0.8053242834320877,
+ "batch": 8,
+ "lr": 0.0001,
+ "seed": 0,
+ "amp": false,
+ "tau_gt": 0.15074408054351807,
+ "n_parametros": 47403133,
+ "n_frames_treino": 240,
+ "historico": [
+  {
+   "epoca": 1,
+   "perda_treino": 50.519698270161946,
+   "dice_valid": 0.7858741442162829,
+   "iou_valid": 0.6472756843721129,
+   "tempo_s": 169.78398084640503
+  },
+  {
+   "epoca": 2,
+   "perda_treino": 31.891529273986816,
+   "dice_valid": 0.8053242834320877,
+   "iou_valid": 0.6740944611694619,
+   "tempo_s": 314.59157705307007
+  },
+  {
+   "epoca": 3,
+   "perda_treino": 29.038398615519206,
+   "dice_valid": 0.7957721697976156,
+   "iou_valid": 0.6608152957766114,
+   "tempo_s": 465.61078333854675
+  },
+  {
+   "epoca": 4,
+   "perda_treino": 28.336138407389324,
+   "dice_valid": 0.7977008159093665,
+   "iou_valid": 0.6634794620714248,
+   "tempo_s": 619.348165512085
+  }
+ ],
+ "tempo_treino_s": 619.3482570648193,
+ "latencia_rede_ms_frame": 173.0821032499989,
+ "latencia_pre_ms_frame": 4.872686664263408,
+ "memoria_pico_MB": NaN,
+ "dispositivo": "cpu",
+ "gpu": "x86_64",
+ "versoes": {
+  "python": "3.12.3",
+  "torch": "2.15.0+cpu",
+  "numpy": "2.5.5"
+ },
+ "piloto": true
+}

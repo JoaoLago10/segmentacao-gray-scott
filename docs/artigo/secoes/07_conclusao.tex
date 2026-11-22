@@ -15,6 +15,11 @@ periódicas e seleção de parâmetros só na validação. A análise mecanísti
     pequenas, cujos erros se concentram nas bordas reconstruídas a partir de $1/4$ da resolução;
   \item a filtragem temporal (Q5) só é segura nos regimes estáticos.
 \end{enumerate}
-%CONCLUSAO_PILOTO%
+No piloto, (2), (3) e (4) se confirmaram: nenhum filtro melhorou de forma significativa, a U-Net
+superou os Transformers em 15 a 17 pontos de Dice, com erros deles concentrados em pontes de FP
+entre estruturas vizinhas, e Q5 só foi inócuo em Maze e Bubbles. A hipótese (1) foi refinada: o
+Z-score mudou a \emph{calibração}, e não a separabilidade. Com o limiar otimizado (Q1), ele produziu
+a melhor configuração da U-Net (Dice 0,972). Por isso, no benchmark, o efeito de cada
+pré-processamento deve ser lido junto com Q1.
 \revisar{Atualizar com os números finais do experimento completo.} As tabelas estão no esquema
 padronizado do protocolo, prontas para o artigo de benchmark entre sistemas físicos.

@@ -119,7 +119,68 @@ ler essas interações: uma combinação é sinérgica quando a célula supera a
 linha e da sua coluna.
 
 \subsection{Evidências observadas}
-%EVIDENCIAS%
+\revisar{Os números abaixo são do \textbf{piloto} (CPU; 4 épocas, 4 trajetórias de treino por
+regime, pré P0, P1, P6 e P9, 3 trajetórias de teste por regime com frames a cada 1000~s). Substituir
+pelos do experimento completo, mantendo a estrutura do argumento.}
+
+\paragraph{Arquiteturas e resolução de saída} Na referência, a U-Net obteve Dice
+$0{,}963\pm0{,}007$, contra $0{,}810\pm0{,}018$ do SegFormer e $0{,}790\pm0{,}021$ do Mask2Former
+(mIoU de 0,952, 0,756 e 0,758). A diferença é de natureza, e não de grau. O SegFormer tem Recall
+alto ($0{,}953$), mas Precision baixa ($0{,}708$): suas máscaras são \emph{dilatadas}. A tabela
+visual de Spots (Figura~\ref{fig:visual_spots}) mostra o mecanismo: em $t=5000$ s, o SegFormer e o
+Mask2Former ligam manchas vizinhas por pontes de FP. A $1/4$ da resolução, o espaço de fundo entre
+duas manchas ocupa menos de uma célula da grade de $32\times32$, e a interpolação bilinear da saída
+não consegue reabri-lo. O erro não acompanha o número de estruturas, e sim a \emph{densidade de
+interface}. Os piores regimes dos Transformers foram Spots (0,71 a 0,76) e Gliders (0,76 a 0,77).
+No SegFormer, Maze, com listras longas mas 58\% de pixels de interface (ficha da Etapa 2),
+ficou abaixo de Bubbles (0,816 contra 0,862). A U-Net ficou entre 0,93 e 0,98 em todos os regimes. A
+hipótese de que a resolução de saída domina o desempenho se confirmou. O pré-treino em imagens
+naturais não compensou a perda de resolução.
+
+\paragraph{Normalização (P1): calibração, não separabilidade} O Z-score \emph{piorou} a U-Net
+($0{,}920$ contra $0{,}963$, fora do IC) e o SegFormer ($0{,}763$ contra $0{,}810$), e foi neutro no
+Mask2Former ($0{,}788$). À primeira vista, isso contraria a invariância afim. A explicação aparece
+quando se combina P1 com Q1: o limiar otimizado leva a U-Net com P1 a $0{,}972$ e o SegFormer com
+P1 a $0{,}836$, os \emph{melhores} resultados de cada rede no piloto. Portanto, o Z-score não reduziu
+a capacidade de separar padrão e fundo. Ele deslocou a \emph{calibração} das probabilidades em torno
+de 0,5, o que é compatível com o argumento afim: a fronteira de decisão continua representável, e só
+o ponto de corte muda. Com 4 épocas, as estatísticas do BN e a perda ainda não fixaram o ponto 0,5;
+resta verificar com 20 épocas. Para o benchmark, a lição é que comparar pré-processamentos com
+limiar fixo (Q0) confunde separabilidade com calibração. A coluna Q1 do
+heatmap (Figura~\ref{fig:heatmap}) é a comparação justa.
+
+\paragraph{Filtros espaciais} O gaussiano (P6) teve efeito pequeno e dentro do IC na U-Net
+($0{,}958$ contra $0{,}963$), nulo no SegFormer e $-0{,}004$ no Mask2Former. A difusão anisotrópica
+(P9) variou entre $-0{,}007$ e $+0{,}011$, também dentro dos ICs. Nenhum filtro melhorou de forma
+significativa, como previsto para dados sem ruído. Mas o dano do gaussiano previsto pela análise de
+frequência não apareceu. A atenuação de 12 a 27\% do contraste é uma transformação suave e quase
+invertível, e redes com contexto espacial (as três aqui) aprendem a compensá-la, já que o GT é fixo.
+O filtro só prejudica quem não tem vizinhança para desfazê-lo.
+
+\paragraph{Pós-processamentos} Q1 foi o único pós com ganho consistente: $+0{,}006$ na U-Net,
+$+0{,}028$ no SegFormer (Precision de $0{,}708$ para $0{,}851$, ao cortar a periferia dilatada das
+máscaras) e $+0{,}001$ no Mask2Former, cujas probabilidades já são mais concentradas. Isso confirma
+que o limiar ajuda mais quem tem bordas borradas pela interpolação. A abertura (Q2) ajudou um pouco o
+SegFormer ($+0{,}008$, ao desfazer pontes finas) e piorou um pouco a U-Net ($-0{,}004$). O fechamento
+(Q3) piorou o SegFormer ($-0{,}009$), porque reforça as pontes. O filtro de componentes (Q4) teve
+efeito nulo nas três redes: nenhuma produz componentes espúrios pequenos, e a validação escolheu
+$a_{\min}$ pequeno, o que preserva os Gliders.
+
+\paragraph{Q5 e regimes móveis} A filtragem temporal foi o pós mais prejudicial (Dice de $-0{,}10$ a
+$-0{,}15$). A perda concentrou-se em Gliders (U-Net: $0{,}934\to0{,}526$) e Spirals
+($0{,}955\to0{,}646$), e foi bem menor em Maze ($0{,}973\to0{,}938$) e Bubbles
+($0{,}970\to0{,}936$). O erro de consistência temporal da U-Net subiu de $0{,}006$ para $0{,}174$.
+No piloto, o passo de 1000 s entre frames exagera o efeito, mas o padrão confirma o mecanismo: a
+média temporal só é segura onde o padrão é estático.
+
+\paragraph{Formação do padrão} Na tabela visual de Gliders (Figura~\ref{fig:visual_gliders}), em
+$t=400$ s o GT é formado por \emph{anéis}, porque durante a formação $B$ cai no centro das manchas.
+As redes tendem a prever discos cheios, já que o vale de $A$ é cheio. Isso mostra o limite físico
+de inferir $B$ a partir de $A$.
+
+\paragraph{Custo} Por frame, na CPU e com lote de 1, a rede custa 28 ms (SegFormer), 54 ms (U-Net) e
+254 ms (Mask2Former). Os pós morfológicos e de componentes custam de 1 a 2 ms. O Mask2Former é 9
+vezes mais lento que o SegFormer e tem 6 vezes os parâmetros da U-Net, para o pior Dice.
 
 \subsection{Limitações}
 \begin{itemize}
