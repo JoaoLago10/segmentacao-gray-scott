@@ -40,7 +40,10 @@ treino:
   pretreinado: true       # SegFormer (mit-b0, ImageNet) e Mask2Former (Swin-T, ADE20K); U-Net do zero
   lr: {unet: 0.001, segformer: 0.0002, mask2former: 0.0001}
   weight_decay: 0.0001
-  batch: {unet: 16, segformer: 16, mask2former: 8}
+  batch: {unet: 16, segformer: 16, mask2former: 16}
+  # Mask2Former: pontos amostrados na perda/emparelhamento. O artigo usa 12544 (112^2) para máscaras
+  # de 128x128 (entrada de 512 px), ~0,77 ponto por célula; aqui as máscaras têm 32x32 = 1024 células.
+  mask2former_pontos: 1024
   perda: "BCE + Dice (U-Net, SegFormer); perda nativa do Mask2Former"
   aumento: "rotações de 90 graus, reflexões e translações circulares (domínio periódico)"
   validacao_por_epoca: 600   # frames de validação (fixos) usados para escolher a melhor época

@@ -8,6 +8,7 @@ Uso:
     python scripts/05_treinar.py --arch all --pre all            # 33 treinos (3 x 11)
     python scripts/05_treinar.py --arch unet segformer --pre all # subconjunto (ex.: uma GPU)
     python scripts/05_treinar.py --bench                         # mede s/iteração e estima o tempo total
+    CUDA_VISIBLE_DEVICES=0 python scripts/05_treinar.py --fila & CUDA_VISIBLE_DEVICES=1 python scripts/05_treinar.py --fila
     python scripts/05_treinar.py --arch all --pre P0 P1 P6 P9 --piloto   # piloto em CPU
 
 Saídas (``results/exp`` ou ``results/piloto``):
@@ -21,6 +22,7 @@ from __future__ import annotations
 import argparse
 import copy
 import json
+import os
 import platform
 import sys
 import time
@@ -70,7 +72,8 @@ def bench(cfg, archs, dev, amp, n_train, n_val, n_eval):
     """Mede s/iteração no dispositivo e estima o tempo de um treino completo por arquitetura."""
     for arch in archs:
         torch.manual_seed(0)
-        model = models.build(arch, pretrained=cfg["treino"]["pretreinado"]).to(dev)
+        model = models.build(arch, pretrained=cfg["treino"]["pretreinado"],
+                             mask2former_points=cfg["treino"]["mask2former_pontos"]).to(dev)
         bs = cfg["treino"]["batch"][arch]
         opt, sched = make_opt(model, cfg, arch, 1000)
         scaler = torch.amp.GradScaler("cuda", enabled=amp)
@@ -109,6 +112,8 @@ def main():
     ap.add_argument("--amp", action="store_true", help="precisão mista fp16 (só CUDA)")
     ap.add_argument("--bench", action="store_true", help="só mede a velocidade e estima o tempo total")
     ap.add_argument("--refazer", action="store_true")
+    ap.add_argument("--fila", action="store_true",
+                    help="fila compartilhada entre processos (várias GPUs): cada treino é reservado por um arquivo .lock")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -141,13 +146,21 @@ def main():
         bench(cfg, archs, dev, amp, len(A_fit), len(sel), n_eval)
         return
 
-    for arch in archs:
-        for pid in pres:
+    # Mais caro primeiro: com --fila, as GPUs livres pegam o próximo treino disponível.
+    jobs = [(a, p) for a in sorted(archs, key=lambda a: a != "mask2former") for p in pres]
+    claims = out_dir / "claims"
+    claims.mkdir(parents=True, exist_ok=True)
+    for arch, pid in jobs:
             tag = f"{arch}_{pid}"
             run_path = out_dir / "runs" / f"{tag}.json"
             if run_path.exists() and not args.refazer:
                 print(f"[{tag}] já existe, pulando", flush=True)
                 continue
+            if args.fila:
+                try:
+                    os.close(os.open(claims / f"{tag}.lock", os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+                except FileExistsError:
+                    continue  # outro processo já está treinando este
             torch.manual_seed(cfg["seed"])
             np.random.seed(cfg["seed"])
             pre = preprocessing.build(pid).fit(A_fit)
@@ -156,7 +169,8 @@ def main():
             pre_ms_frame = 1000 * (time.time() - t0) / len(Xtr)
             Xsel = pre(A_va[sel])
 
-            model = models.build(arch, pretrained=pretrained).to(dev)
+            model = models.build(arch, pretrained=pretrained,
+                                 mask2former_points=cfg["treino"]["mask2former_pontos"]).to(dev)
             n_params = sum(p.numel() for p in model.parameters())
             bs = cfg["treino"]["batch"][arch]
             dl = torch.utils.data.DataLoader(
@@ -215,7 +229,8 @@ def main():
                 "arch": arch, "arquitetura": models.ARCH_NAMES[arch], "pre": pre.describe(),
                 "pretreinado": pretrained and arch != "unet", "epocas": epochs, "melhor_epoca": best[1],
                 "dice_valid_melhor": best[0], "batch": bs, "lr": cfg["treino"]["lr"][arch], "seed": cfg["seed"],
-                "amp": amp, "tau_gt": TAU, "n_parametros": n_params, "n_frames_treino": int(len(Xtr)),
+                "amp": amp, "mask2former_pontos": cfg["treino"]["mask2former_pontos"] if arch == "mask2former" else None,
+                "tau_gt": TAU, "n_parametros": n_params, "n_frames_treino": int(len(Xtr)),
                 "historico": hist, "tempo_treino_s": train_s, "latencia_rede_ms_frame": lat_ms,
                 "latencia_pre_ms_frame": pre_ms_frame, "memoria_pico_MB": mem_mb, "dispositivo": str(dev),
                 "gpu": torch.cuda.get_device_name() if dev.type == "cuda" else platform.processor(),

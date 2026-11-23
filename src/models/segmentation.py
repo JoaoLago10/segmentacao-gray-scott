@@ -100,10 +100,11 @@ class SegFormer(nn.Module):
 class Mask2Former(nn.Module):
     """Mask2Former (Cheng et al., 2022) com backbone Swin-T, em modo semântico de 2 classes."""
 
-    def __init__(self, pretrained=True):
+    def __init__(self, pretrained=True, train_num_points=12544):
         super().__init__()
         from transformers import Mask2FormerConfig, Mask2FormerForUniversalSegmentation
-        kw = dict(num_labels=2, id2label={0: "fundo", 1: "padrao"}, label2id={"fundo": 0, "padrao": 1})
+        kw = dict(num_labels=2, id2label={0: "fundo", 1: "padrao"}, label2id={"fundo": 0, "padrao": 1},
+                  train_num_points=train_num_points)
         if pretrained:
             self.net = Mask2FormerForUniversalSegmentation.from_pretrained(
                 MASK2FORMER_CKPT, ignore_mismatched_sizes=True, **kw)
@@ -132,5 +133,9 @@ ARCHS = {"unet": UNet, "segformer": SegFormer, "mask2former": Mask2Former}
 ARCH_NAMES = {"unet": "U-Net", "segformer": "SegFormer", "mask2former": "Mask2Former"}
 
 
-def build(name: str, pretrained: bool = True) -> nn.Module:
-    return UNet() if name == "unet" else ARCHS[name](pretrained=pretrained)
+def build(name: str, pretrained: bool = True, mask2former_points: int = 12544) -> nn.Module:
+    if name == "unet":
+        return UNet()
+    if name == "mask2former":
+        return Mask2Former(pretrained=pretrained, train_num_points=mask2former_points)
+    return SegFormer(pretrained=pretrained)
