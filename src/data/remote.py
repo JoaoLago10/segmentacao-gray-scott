@@ -9,6 +9,10 @@ intervalo de bytes, sem transferir os arquivos completos (21 GB no treino).
 from __future__ import annotations
 
 import json
+import os
+import random
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -94,28 +98,47 @@ def read_layout(split: str, regime: str, cache_dir: Path | None = None) -> FileL
 
 
 _SIGNED: dict[str, str] = {}
+_LOCK = threading.Lock()
 _SESSION = requests.Session()
 _SESSION.mount("https://", requests.adapters.HTTPAdapter(pool_connections=8, pool_maxsize=64))
 
 
+def _auth_headers() -> dict:
+    tok = os.environ.get("HF_TOKEN")
+    return {"Authorization": f"Bearer {tok}"} if tok else {}
+
+
 def _signed_url(url: str, refresh: bool = False) -> str:
     """Resolve uma vez o redirecionamento do Hugging Face para a URL assinada da CDN."""
-    if refresh or url not in _SIGNED:
-        r = _SESSION.get(url, headers={"Range": "bytes=0-0"}, allow_redirects=False, timeout=60)
-        _SIGNED[url] = r.headers.get("location", url)
-    return _SIGNED[url]
+    with _LOCK:
+        if refresh or url not in _SIGNED:
+            r = _SESSION.get(url, headers={"Range": "bytes=0-0", **_auth_headers()},
+                             allow_redirects=False, timeout=60)
+            _SIGNED[url] = r.headers.get("location", url)
+        return _SIGNED[url]
 
 
-def _fetch(url: str, start: int, nbytes: int) -> bytes:
+def _fetch(url: str, start: int, nbytes: int, attempts: int = 10) -> bytes:
+    """Lê um intervalo de bytes com espera exponencial (e Retry-After) entre tentativas.
+
+    A URL assinada só é renovada quando expira (403/401); limites de taxa (429) e
+    erros temporários (5xx, rede) apenas esperam e tentam de novo.
+    """
     headers = {"Range": f"bytes={start}-{start + nbytes - 1}"}
-    for attempt in range(6):
+    last = "?"
+    for attempt in range(attempts):
         try:
-            r = _SESSION.get(_signed_url(url, refresh=attempt > 0), headers=headers, timeout=120)
+            r = _SESSION.get(_signed_url(url), headers=headers, timeout=120)
             if r.status_code == 206 and len(r.content) == nbytes:
                 return r.content
-        except requests.RequestException:
-            pass
-    raise RuntimeError(f"falha ao ler {url} [{start}, {start + nbytes})")
+            last = f"HTTP {r.status_code}"
+            if r.status_code in (401, 403):
+                _signed_url(url, refresh=True)
+            wait = float(r.headers.get("Retry-After", 0) or 0)
+        except requests.RequestException as e:
+            last, wait = type(e).__name__, 0.0
+        time.sleep(max(wait, min(60.0, 2.0 ** attempt)) * (0.5 + random.random()))
+    raise RuntimeError(f"falha ao ler {url} [{start}, {start + nbytes}) após {attempts} tentativas ({last})")
 
 
 def _runs(times: np.ndarray) -> list[tuple[int, int]]:
@@ -128,7 +151,7 @@ def _runs(times: np.ndarray) -> list[tuple[int, int]]:
 
 
 def read_frames_many(layout: FileLayout, field: str, trajs: list[int],
-                     times: list[int] | np.ndarray, workers: int = 32) -> np.ndarray:
+                     times: list[int] | np.ndarray, workers: int = 16) -> np.ndarray:
     """Retorna (len(trajs), len(times), H, W) com os frames pedidos.
 
     Frames consecutivos viram uma única requisição; as requisições de todas as

@@ -46,11 +46,24 @@ def fetch_split(cfg: dict, name: str) -> Path:
                 return out
         print(f"  {name}: configuração mudou, baixando de novo", flush=True)
     parts = {"A": [], "B": [], "regime": [], "traj": []}
+    tmp = out.parent / "parciais"
+    tmp.mkdir(parents=True, exist_ok=True)
     for r in REGIMES:
         trajs = [spec["traj"]] if "traj" in spec else split_trajs(split, spec["trajs_por_regime"])
-        lay = read_layout(split, r, ROOT / LAYOUT_CACHE)
-        for f in ("A", "B"):
-            parts[f].append(read_frames_many(lay, f, trajs, times))
+        part = tmp / f"{name}_{r}.npz"   # cache por regime: uma falha no meio não perde o que já baixou
+        if part.exists():
+            with np.load(part) as d:
+                ok = list(d["times"]) == times and list(d["traj"]) == trajs
+                if ok:
+                    A_r, B_r = d["A"], d["B"]
+        else:
+            ok = False
+        if not ok:
+            lay = read_layout(split, r, ROOT / LAYOUT_CACHE)
+            A_r, B_r = (read_frames_many(lay, f, trajs, times) for f in ("A", "B"))
+            np.savez(part, A=A_r, B=B_r, traj=np.array(trajs), times=np.array(times))
+        parts["A"].append(A_r)
+        parts["B"].append(B_r)
         parts["regime"] += [r] * len(trajs)
         parts["traj"] += trajs
         print(f"  {name}/{r}: {len(trajs)} trajetórias x {len(times)} frames", flush=True)
@@ -58,6 +71,8 @@ def fetch_split(cfg: dict, name: str) -> Path:
     np.savez(out, A=np.concatenate(parts["A"]), B=np.concatenate(parts["B"]),
              regime=np.array(parts["regime"]), traj=np.array(parts["traj"]),
              times=np.array(times))
+    for r in REGIMES:
+        (tmp / f"{name}_{r}.npz").unlink(missing_ok=True)
     return out
 
 
