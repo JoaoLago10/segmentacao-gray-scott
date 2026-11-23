@@ -117,6 +117,12 @@ húngaro. O otimizador é AdamW \cite{loshchilov2019} com política \emph{one-cy
 com taxa máxima de $10^{-3}$ na U-Net, $2\cdot10^{-4}$ no SegFormer e $10^{-4}$ no Mask2Former, que
 são as escalas usuais para treino do zero e para ajuste fino. Usamos \emph{weight decay} de
 $10^{-4}$, recorte de gradiente em norma 1, precisão mista \cite{micikevicius2018} e semente fixa (0).
+Todas as redes usam lote de 16 frames. No Mask2Former, a perda e o emparelhamento húngaro são
+calculados em pontos amostrados das máscaras. O artigo original usa $K=112^2=12\,544$ pontos para
+máscaras de $128\times128$ (entrada de 512 px), ou seja, $\sim$0,77 ponto por célula. Aqui as
+máscaras têm $32\times32=1024$ células, e mantivemos a mesma ordem de densidade com $K=1024$. Isso
+reduz em $\sim$40\% o custo por frame sem alterar a arquitetura e torna o orçamento de 20 épocas
+viável na T4.
 
 Conforme o protocolo, cada execução tem \textbf{exatamente 20 épocas}, sem \emph{early stopping}. Ao
 fim de cada época, o Dice é medido num subconjunto fixo de 600 frames de validação, e o checkpoint
