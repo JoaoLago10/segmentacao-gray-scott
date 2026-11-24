@@ -146,6 +146,12 @@ Usamos o backbone Swin-T \cite{liu2021swin} com decodificador de pixels por aten
 multiescala \cite{zhu2021deformable} (47,4 M de parâmetros), pré-treinado em segmentação semântica no
 ADE20K \cite{zhou2017ade}, com duas classes (fundo e padrão). Assim como no SegFormer, as máscaras
 são preditas a $1/4$ da resolução.
+Na inferência, os \emph{logits} $\mathbf{q}_i^\top\mathbf{F}$ são interpolados bilinearmente para
+$128\times128$ \emph{antes} da sigmoide, como na implementação de referência e como na perda de
+treino, que amostra pontos por interpolação dos logits. Interpolar as probabilidades já saturadas
+limitaria o Dice ao de um mapa suave em $32\times32$. Medimos esse teto com um oráculo que conhece o
+GT, mas só responde nessa grade: Dice $0{,}816$. Com logits interpolados, a fronteira pode cair em
+posição subcelular.
 
 \subsection{Pré-processamentos}
 \label{sec:pre}

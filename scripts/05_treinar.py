@@ -39,6 +39,9 @@ from src.evaluation.metrics import confusion, scores  # noqa: E402
 from src.ground_truth.generation import TAU, gt_mask, valid_frames  # noqa: E402
 
 
+M2F_INFERENCIA = "logits_interpolados"   # versão da inferência do Mask2Former (ver src/models/segmentation.py)
+
+
 def subset_piloto(d: dict, n_traj: int, every: int) -> dict:
     """Piloto: as primeiras n_traj trajetórias por regime e 1 de cada ``every`` frames."""
     keep = np.concatenate([np.nonzero(d["regime"] == r)[0][:n_traj] for r in dict.fromkeys(d["regime"])])
@@ -153,14 +156,24 @@ def main():
     for arch, pid in jobs:
             tag = f"{arch}_{pid}"
             run_path = out_dir / "runs" / f"{tag}.json"
+            stale = False
             if run_path.exists() and not args.refazer:
-                print(f"[{tag}] já existe, pulando", flush=True)
-                continue
+                prev = json.loads(run_path.read_text())
+                if arch == "mask2former" and prev.get("m2f_inferencia") != M2F_INFERENCIA:
+                    # treino anterior escolheu a melhor época com a inferência antiga (sigmoide antes de
+                    # interpolar); a seleção de checkpoint ficou viciada, então é refeito
+                    print(f"[{tag}] treino antigo do Mask2Former (inferência anterior): refazendo", flush=True)
+                    stale = True
+                else:
+                    print(f"[{tag}] já existe, pulando", flush=True)
+                    continue
             if args.fila:
                 try:
                     os.close(os.open(claims / f"{tag}.lock", os.O_CREAT | os.O_EXCL | os.O_WRONLY))
                 except FileExistsError:
                     continue  # outro processo já está treinando este
+            if stale:  # deixa de contar como pronto (a avaliação não mistura resultados antigos e novos)
+                run_path.unlink(missing_ok=True)
             torch.manual_seed(cfg["seed"])
             np.random.seed(cfg["seed"])
             pre = preprocessing.build(pid).fit(A_fit)
@@ -229,7 +242,8 @@ def main():
                 "arch": arch, "arquitetura": models.ARCH_NAMES[arch], "pre": pre.describe(),
                 "pretreinado": pretrained and arch != "unet", "epocas": epochs, "melhor_epoca": best[1],
                 "dice_valid_melhor": best[0], "batch": bs, "lr": cfg["treino"]["lr"][arch], "seed": cfg["seed"],
-                "amp": amp, "mask2former_pontos": cfg["treino"]["mask2former_pontos"] if arch == "mask2former" else None,
+                "amp": amp, "m2f_inferencia": M2F_INFERENCIA if arch == "mask2former" else None,
+                "mask2former_pontos": cfg["treino"]["mask2former_pontos"] if arch == "mask2former" else None,
                 "tau_gt": TAU, "n_parametros": n_params, "n_frames_treino": int(len(Xtr)),
                 "historico": hist, "tempo_treino_s": train_s, "latencia_rede_ms_frame": lat_ms,
                 "latencia_pre_ms_frame": pre_ms_frame, "memoria_pico_MB": mem_mb, "dispositivo": str(dev),

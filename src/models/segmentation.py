@@ -123,9 +123,13 @@ class Mask2Former(nn.Module):
     def predict_proba(self, x):
         out = self.net(pixel_values=x.expand(-1, 3, -1, -1))
         cls = out.class_queries_logits.softmax(-1)[..., :-1]                   # (B, Q, 2), sem "vazio"
-        masks = out.masks_queries_logits.sigmoid()                             # (B, Q, H/4, W/4)
-        seg = torch.einsum("bqc,bqhw->bchw", cls, masks)
-        seg = F.interpolate(seg, size=x.shape[-2:], mode="bilinear", align_corners=False)
+        # Interpola os LOGITS das máscaras (H/4 -> H) e só depois aplica a sigmoide, como no
+        # post_process_semantic_segmentation oficial e como na perda de treino (pontos amostrados
+        # por interpolação bilinear dos logits). Interpolar as probabilidades limitaria o Dice ao
+        # teto de um mapa suave em 32 x 32 (~0,82 neste problema).
+        logits = F.interpolate(out.masks_queries_logits.float(), size=x.shape[-2:], mode="bilinear",
+                               align_corners=False)
+        seg = torch.einsum("bqc,bqhw->bchw", cls.float(), logits.sigmoid())
         return seg[:, 1] / seg.sum(1).clamp_min(1e-8)
 
 
